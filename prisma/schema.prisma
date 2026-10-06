@@ -1,0 +1,61 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Member {
+  id             String          @id @default(cuid())
+  name           String
+  phone          String
+  createdAt      DateTime        @default(now())
+  memberBillings MemberBilling[]
+}
+
+model BillingCycle {
+  id             String          @id @default(cuid())
+  month          Int
+  year           Int
+  name           String
+  isClosed       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  bills          UtilityBill[]
+  memberBillings MemberBilling[]
+
+  @@unique([year, month])
+}
+
+model UtilityBill {
+  id                 String       @id @default(cuid())
+  billingCycleId     String
+  billingCycle       BillingCycle @relation(fields: [billingCycleId], references: [id], onDelete: Cascade)
+  name               String       // e.g. "WiFi", "Gas", "Electricity", "Cook/Maid"
+  billType           String       @default("VARIABLE") // "FIXED" or "VARIABLE"
+  totalAmount        Float
+  collectedPerPerson Float        // Custom collected per person (e.g. 165 or 285)
+  splitCount         Int?         @default(0) // 0 or null = default all members, > 0 = custom count (e.g. 7 for gas with guest)
+  createdAt          DateTime     @default(now())
+}
+
+model MemberBilling {
+  id             String       @id @default(cuid())
+  billingCycleId String
+  billingCycle   BillingCycle @relation(fields: [billingCycleId], references: [id], onDelete: Cascade)
+  memberId       String
+  member         Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  roomRent       Float        @default(0) // Individual room rent
+  paidAmount     Float        @default(0) // Total amount paid so far
+  notes          String?
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([billingCycleId, memberId])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
