@@ -646,22 +646,22 @@ export default function Dashboard({
 
             {/* Admin Status Indicator & Lock / Unlock Toggle */}
             {isAdmin ? (
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 pl-2.5 pr-1.5 py-1.5 rounded-xl text-emerald-800 text-xs font-bold shadow-2xs">
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 pl-2.5 pr-1.5 py-1.5 rounded-xl text-emerald-800 text-xs font-bold shadow-2xs shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span className="hidden sm:inline">Admin</span>
                 <button
                   type="button"
                   onClick={() => setChangePinModalOpen(true)}
                   title="Change Admin PIN"
-                  className="p-1 text-emerald-700 hover:text-indigo-600 hover:bg-emerald-100 rounded-md transition-colors"
+                  className="p-1 text-emerald-700 hover:text-indigo-600 hover:bg-emerald-100 rounded-md transition-colors cursor-pointer touch-manipulation"
                 >
-                  <KeyRound className="w-3 h-3" />
+                  <KeyRound className="w-3 h-3 pointer-events-none" />
                 </button>
                 <button
                   type="button"
                   onClick={handleLock}
                   title="Lock Admin Mode"
-                  className="px-2 py-0.5 text-[11px] bg-white border border-emerald-300 hover:border-rose-300 text-emerald-700 hover:text-rose-600 rounded-lg transition-colors font-bold"
+                  className="px-2 py-0.5 text-[11px] bg-white border border-emerald-300 hover:border-rose-300 text-emerald-700 hover:text-rose-600 rounded-lg transition-colors font-bold cursor-pointer touch-manipulation"
                 >
                   Lock
                 </button>
@@ -670,46 +670,112 @@ export default function Dashboard({
               <button
                 type="button"
                 onClick={() => setPinModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 shrink-0 cursor-pointer touch-manipulation"
               >
-                <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>Admin Unlock</span>
+                <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0 pointer-events-none" />
+                <span className="pointer-events-none hidden sm:inline">Admin Unlock</span>
+                <span className="pointer-events-none sm:hidden">Unlock</span>
               </button>
             )}
           </div>
         </div>
 
+        {/* Mobile Top Pill Segmented Switcher (< sm) */}
+        <div className="flex sm:hidden items-center justify-between border-t border-slate-100 bg-slate-50/80 px-2 py-1.5 gap-1 select-none">
+          <button
+            type="button"
+            onClick={() => setActiveTab('dues')}
+            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+              activeTab === 'dues'
+                ? 'bg-white text-indigo-600 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+            }`}
+          >
+            <CreditCard className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
+            <span className="pointer-events-none">Dues</span>
+            {totalDuesPending > 0 && (
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 pointer-events-none" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('utilities')}
+            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+              activeTab === 'utilities'
+                ? 'bg-white text-indigo-600 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+            }`}
+          >
+            <Receipt className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
+            <span className="pointer-events-none">Bills</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('members')}
+            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+              activeTab === 'members'
+                ? 'bg-white text-indigo-600 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
+            <span className="pointer-events-none">Members</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('notes')}
+            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+              activeTab === 'notes'
+                ? 'bg-white text-indigo-600 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
+            <span className="pointer-events-none">Notes</span>
+            {importantNotes.length > 0 && (
+              <span className="px-1 py-0.2 rounded-full bg-emerald-500 text-[9px] font-extrabold text-white shrink-0 pointer-events-none">
+                {importantNotes.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Navigation Tabs (Desktop & Tablet) */}
         <div className="hidden sm:flex max-w-5xl mx-auto px-4 sm:px-6 border-t border-slate-100 overflow-x-auto">
           <button
+            type="button"
             onClick={() => setActiveTab('dues')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
               activeTab === 'dues'
                 ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            <CreditCard className="w-4 h-4" />
-            Member Dues & Payments
+            <CreditCard className="w-4 h-4 pointer-events-none" />
+            <span className="pointer-events-none">Member Dues & Payments</span>
             {totalDuesPending > 0 && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold pointer-events-none">
                 ৳{Math.round(totalDuesPending)} Due
               </span>
             )}
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('utilities')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
               activeTab === 'utilities'
                 ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Receipt className="w-4 h-4" />
-            Utility Bills & Split
+            <Receipt className="w-4 h-4 pointer-events-none" />
+            <span className="pointer-events-none">Utility Bills & Split</span>
             <span
-              className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+              className={`text-[11px] px-2 py-0.5 rounded-full font-bold pointer-events-none ${
                 netUtilityAdjustment === 0
                   ? 'bg-emerald-100 text-emerald-800'
                   : netUtilityAdjustment > 0
@@ -726,28 +792,30 @@ export default function Dashboard({
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('members')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
               activeTab === 'members'
                 ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Users className="w-4 h-4" />
-            Members ({memberCount})
+            <Users className="w-4 h-4 pointer-events-none" />
+            <span className="pointer-events-none">Members ({memberCount})</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('notes')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
               activeTab === 'notes'
                 ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
-            Important Notes ({importantNotes.length})
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase tracking-wider">
+            <BookOpen className="w-4 h-4 pointer-events-none" />
+            <span className="pointer-events-none">Important Notes ({importantNotes.length})</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase tracking-wider pointer-events-none">
               Open
             </span>
           </button>
@@ -1428,10 +1496,10 @@ export default function Dashboard({
               <button
                 type="button"
                 onClick={handleOpenAddNote}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 shrink-0 self-start sm:self-auto"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer touch-manipulation shrink-0 self-start sm:self-auto"
               >
-                <Plus className="w-4 h-4" />
-                Add Contact / Note
+                <Plus className="w-4 h-4 pointer-events-none" />
+                <span className="pointer-events-none">Add Contact / Note</span>
               </button>
             </div>
 
@@ -1592,17 +1660,17 @@ export default function Dashboard({
                             }
                           }
                         }}
-                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-semibold transition-all flex items-center gap-1 active:scale-95 ${
+                        className={`text-xs px-2.5 py-1.5 rounded-lg border font-semibold transition-colors cursor-pointer touch-manipulation flex items-center gap-1 ${
                           isSelected
                             ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
                             : alreadyInCycle
-                            ? 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
-                            : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40'
+                            ? 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100 active:bg-slate-200'
+                            : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 active:bg-indigo-100'
                         }`}
                       >
-                        <span>{item.name}</span>
+                        <span className="pointer-events-none">{item.name}</span>
                         {alreadyInCycle && (
-                          <span className="text-[10px] text-slate-400 font-normal">(Added)</span>
+                          <span className="text-[10px] text-slate-400 font-normal pointer-events-none">(Added)</span>
                         )}
                       </button>
                     );
@@ -2183,10 +2251,10 @@ export default function Dashboard({
                         if (!noteContact) setNoteContact(item.placeholderNumber);
                         if (!noteDetails) setNoteDetails(item.placeholderDetails);
                       }}
-                      className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 font-semibold transition-all active:scale-95 flex items-center gap-1.5"
+                      className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40 active:bg-indigo-100 text-slate-700 font-semibold transition-colors cursor-pointer touch-manipulation flex items-center gap-1.5"
                     >
-                      <span>{item.icon}</span>
-                      <span>{item.title}</span>
+                      <span className="pointer-events-none">{item.icon}</span>
+                      <span className="pointer-events-none">{item.title}</span>
                     </button>
                   ))}
                 </div>
@@ -2258,39 +2326,39 @@ export default function Dashboard({
       {/* Mobile Fixed Bottom Navigation Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 py-1.5 px-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] sm:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 pt-1 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] sm:hidden"
       >
-        <div className="grid grid-cols-4 items-center gap-1 max-w-md mx-auto">
+        <div className="grid grid-cols-4 items-center gap-1 max-w-md mx-auto select-none">
           {/* Tab 1: Dues */}
           <button
             type="button"
             onClick={() => setActiveTab('dues')}
-            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
               activeTab === 'dues'
                 ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700'
+                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
             }`}
           >
-            <div className="relative">
+            <div className="relative pointer-events-none">
               <CreditCard className={`w-5 h-5 transition-transform ${activeTab === 'dues' ? 'scale-110 text-indigo-600' : ''}`} />
               {totalDuesPending > 0 && (
                 <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
               )}
             </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none">Dues</span>
+            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Dues</span>
           </button>
 
           {/* Tab 2: Bills */}
           <button
             type="button"
             onClick={() => setActiveTab('utilities')}
-            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
               activeTab === 'utilities'
                 ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700'
+                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
             }`}
           >
-            <div className="relative">
+            <div className="relative pointer-events-none">
               <Receipt className={`w-5 h-5 transition-transform ${activeTab === 'utilities' ? 'scale-110 text-indigo-600' : ''}`} />
               {currentCycle.bills.length > 0 && (
                 <span
@@ -2304,36 +2372,36 @@ export default function Dashboard({
                 />
               )}
             </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none">Bills</span>
+            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Bills</span>
           </button>
 
           {/* Tab 3: Members */}
           <button
             type="button"
             onClick={() => setActiveTab('members')}
-            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
               activeTab === 'members'
                 ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700'
+                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
             }`}
           >
-            <div className="relative">
+            <div className="relative pointer-events-none">
               <Users className={`w-5 h-5 transition-transform ${activeTab === 'members' ? 'scale-110 text-indigo-600' : ''}`} />
             </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none">Members</span>
+            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Members</span>
           </button>
 
           {/* Tab 4: Notes */}
           <button
             type="button"
             onClick={() => setActiveTab('notes')}
-            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
               activeTab === 'notes'
                 ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700'
+                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
             }`}
           >
-            <div className="relative">
+            <div className="relative pointer-events-none">
               <BookOpen className={`w-5 h-5 transition-transform ${activeTab === 'notes' ? 'scale-110 text-indigo-600' : ''}`} />
               {importantNotes.length > 0 && (
                 <span className="absolute -top-1 -right-1.5 px-1 min-w-[14px] h-[14px] rounded-full bg-emerald-500 text-[9px] font-extrabold text-white flex items-center justify-center ring-2 ring-white">
@@ -2341,7 +2409,7 @@ export default function Dashboard({
                 </span>
               )}
             </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none">Notes</span>
+            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Notes</span>
           </button>
         </div>
       </nav>
