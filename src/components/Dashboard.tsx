@@ -547,12 +547,12 @@ export default function Dashboard({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 sm:pb-16">
       {/* Top Header */}
       <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center bg-white shrink-0">
+        <div className="max-w-5xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center bg-white shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo.png"
@@ -561,7 +561,7 @@ export default function Dashboard({
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+              <h1 className="text-base sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
                 Bachelor Point
               </h1>
             </div>
@@ -679,8 +679,8 @@ export default function Dashboard({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex border-t border-slate-100 overflow-x-auto">
+        {/* Navigation Tabs (Desktop & Tablet) */}
+        <div className="hidden sm:flex max-w-5xl mx-auto px-4 sm:px-6 border-t border-slate-100 overflow-x-auto">
           <button
             onClick={() => setActiveTab('dues')}
             className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap ${
@@ -2254,6 +2254,97 @@ export default function Dashboard({
           </div>
         </div>
       )}
+
+      {/* Mobile Fixed Bottom Navigation Bar */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 py-1.5 px-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] sm:hidden"
+      >
+        <div className="grid grid-cols-4 items-center gap-1 max-w-md mx-auto">
+          {/* Tab 1: Dues */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('dues')}
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+              activeTab === 'dues'
+                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <div className="relative">
+              <CreditCard className={`w-5 h-5 transition-transform ${activeTab === 'dues' ? 'scale-110 text-indigo-600' : ''}`} />
+              {totalDuesPending > 0 && (
+                <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              )}
+            </div>
+            <span className="text-[10px] mt-1 font-semibold leading-none">Dues</span>
+          </button>
+
+          {/* Tab 2: Bills */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('utilities')}
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+              activeTab === 'utilities'
+                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <div className="relative">
+              <Receipt className={`w-5 h-5 transition-transform ${activeTab === 'utilities' ? 'scale-110 text-indigo-600' : ''}`} />
+              {currentCycle.bills.length > 0 && (
+                <span
+                  className={`absolute -top-1 -right-1.5 w-2 h-2 rounded-full ring-2 ring-white ${
+                    netUtilityAdjustment > 0
+                      ? 'bg-blue-500'
+                      : netUtilityAdjustment < 0
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500'
+                  }`}
+                />
+              )}
+            </div>
+            <span className="text-[10px] mt-1 font-semibold leading-none">Bills</span>
+          </button>
+
+          {/* Tab 3: Members */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('members')}
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+              activeTab === 'members'
+                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <div className="relative">
+              <Users className={`w-5 h-5 transition-transform ${activeTab === 'members' ? 'scale-110 text-indigo-600' : ''}`} />
+            </div>
+            <span className="text-[10px] mt-1 font-semibold leading-none">Members</span>
+          </button>
+
+          {/* Tab 4: Notes */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('notes')}
+            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all active:scale-95 ${
+              activeTab === 'notes'
+                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <div className="relative">
+              <BookOpen className={`w-5 h-5 transition-transform ${activeTab === 'notes' ? 'scale-110 text-indigo-600' : ''}`} />
+              {importantNotes.length > 0 && (
+                <span className="absolute -top-1 -right-1.5 px-1 min-w-[14px] h-[14px] rounded-full bg-emerald-500 text-[9px] font-extrabold text-white flex items-center justify-center ring-2 ring-white">
+                  {importantNotes.length}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] mt-1 font-semibold leading-none">Notes</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
