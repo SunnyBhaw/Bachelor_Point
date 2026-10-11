@@ -59,3 +59,13 @@ model Setting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+model ImportantNote {
+  id            String   @id @default(cuid())
+  title         String
+  contactNumber String?
+  details       String?
+  category      String   @default("CONTACT")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

@@ -1,4 +1,10 @@
-import { getMembers, getBillingCycles, getOrCreateCurrentCycle, getAdminStatus } from '@/app/actions';
+import {
+  getMembers,
+  getBillingCycles,
+  getOrCreateCurrentCycle,
+  getAdminStatus,
+  getImportantNotes,
+} from '@/app/actions';
 import Dashboard from '@/components/Dashboard';
 
 export const dynamic = 'force-dynamic';
@@ -12,11 +18,12 @@ export default async function Home({
   const year = params.year ? parseInt(params.year) : undefined;
   const month = params.month ? parseInt(params.month) : undefined;
 
-  const [members, cycles, currentCycle, isAdmin] = await Promise.all([
+  const [members, cycles, currentCycle, isAdmin, importantNotes] = await Promise.all([
     getMembers(),
     getBillingCycles(),
     getOrCreateCurrentCycle(year, month),
     getAdminStatus(),
+    getImportantNotes(),
   ]);
 
   if (!currentCycle) {
@@ -33,6 +40,7 @@ export default async function Home({
       initialCycles={cycles}
       currentCycle={currentCycle}
       initialIsAdmin={isAdmin}
+      initialImportantNotes={importantNotes}
     />
   );
 }

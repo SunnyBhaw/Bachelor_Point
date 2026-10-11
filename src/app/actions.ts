@@ -331,3 +331,67 @@ export async function updateMemberBilling(
   revalidatePath('/');
   return billing;
 }
+
+// Important Contacts & Notes (Public access for all roommates - No Admin PIN required)
+export async function getImportantNotes() {
+  return await prisma.importantNote.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function addImportantNote(data: {
+  title: string;
+  contactNumber?: string;
+  details?: string;
+  category?: string;
+}) {
+  if (!data.title.trim()) {
+    throw new Error('Title is required');
+  }
+
+  const note = await prisma.importantNote.create({
+    data: {
+      title: data.title.trim(),
+      contactNumber: data.contactNumber?.trim() || null,
+      details: data.details?.trim() || null,
+      category: data.category?.trim() || 'CONTACT',
+    },
+  });
+
+  revalidatePath('/');
+  return note;
+}
+
+export async function updateImportantNote(
+  id: string,
+  data: {
+    title: string;
+    contactNumber?: string;
+    details?: string;
+    category?: string;
+  }
+) {
+  if (!data.title.trim()) {
+    throw new Error('Title is required');
+  }
+
+  const note = await prisma.importantNote.update({
+    where: { id },
+    data: {
+      title: data.title.trim(),
+      contactNumber: data.contactNumber?.trim() || null,
+      details: data.details?.trim() || null,
+      category: data.category?.trim() || 'CONTACT',
+    },
+  });
+
+  revalidatePath('/');
+  return note;
+}
+
+export async function deleteImportantNote(id: string) {
+  await prisma.importantNote.delete({
+    where: { id },
+  });
+  revalidatePath('/');
+}

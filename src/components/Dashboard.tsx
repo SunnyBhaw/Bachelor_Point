@@ -20,6 +20,10 @@ import {
   Unlock,
   ShieldCheck,
   KeyRound,
+  PhoneCall,
+  Pencil,
+  Copy,
+  BookOpen,
 } from 'lucide-react';
 import {
   addMember,
@@ -32,6 +36,9 @@ import {
   verifyAdminPin,
   lockAdmin,
   changeAdminPin,
+  addImportantNote,
+  updateImportantNote,
+  deleteImportantNote,
 } from '@/app/actions';
 
 interface Member {
@@ -66,6 +73,16 @@ interface BillingCycle {
   memberBillings: MemberBilling[];
 }
 
+export interface ImportantNote {
+  id: string;
+  title: string;
+  contactNumber?: string | null;
+  details?: string | null;
+  category: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
 const COMMON_BILLS_SUGGESTIONS = [
   { name: 'কারেন্ট বিল', type: 'VARIABLE' as const, defaultAmount: '2640', defaultCollected: '440' },
   { name: 'বুয়া খরচ', type: 'FIXED' as const, defaultAmount: '3600', defaultCollected: '600' },
@@ -74,11 +91,21 @@ const COMMON_BILLS_SUGGESTIONS = [
   { name: 'গ্যাস বিল', type: 'VARIABLE' as const, defaultAmount: '1700', defaultCollected: '285' },
 ];
 
+const COMMON_NOTE_SUGGESTIONS = [
+  { title: 'বুয়ার নাম্বার', category: 'CONTACT', icon: '🧹', placeholderNumber: '017xxxxxxxx', placeholderDetails: 'সকাল ৭টায় আসে, রান্নার দায়িত্ব' },
+  { title: 'গ্যাস সিলিন্ডার ডেলিভারি', category: 'CONTACT', icon: '🔥', placeholderNumber: '018xxxxxxxx', placeholderDetails: 'দোকান: ভাই ভাই গ্যাস, দিতে ৩০ মিনিট সময় লাগে' },
+  { title: 'ওয়াইফাই সাপোর্ট (ISP)', category: 'CONTACT', icon: '📶', placeholderNumber: '019xxxxxxxx', placeholderDetails: 'User ID: 10425, প্যাকেজ: 30 Mbps' },
+  { title: 'বাড়িওয়ালা (মালিক)', category: 'CONTACT', icon: '🏠', placeholderNumber: '017xxxxxxxx', placeholderDetails: 'ভাড়া প্রতি মাসের ১-৭ তারিখের মধ্যে পরিশোধ' },
+  { title: 'ইলেকট্রিশিয়ান', category: 'CONTACT', icon: '⚡', placeholderNumber: '016xxxxxxxx', placeholderDetails: 'জরুরী বিদ্যুৎ মেরামতের জন্য' },
+  { title: 'প্লাম্বার (পানি/পাইপ)', category: 'CONTACT', icon: '🔧', placeholderNumber: '018xxxxxxxx', placeholderDetails: 'পানি লাইনে সমস্যা হলে' },
+];
+
 interface DashboardProps {
   initialMembers: Member[];
   initialCycles: { id: string; month: number; year: number; name: string }[];
   currentCycle: BillingCycle;
   initialIsAdmin?: boolean;
+  initialImportantNotes?: ImportantNote[];
 }
 
 export default function Dashboard({
@@ -86,6 +113,7 @@ export default function Dashboard({
   initialCycles,
   currentCycle: initialCycle,
   initialIsAdmin = false,
+  initialImportantNotes = [],
 }: DashboardProps) {
   const [isAdmin, setIsAdmin] = useState<boolean>(initialIsAdmin);
   const [pinModalOpen, setPinModalOpen] = useState(false);
@@ -97,10 +125,20 @@ export default function Dashboard({
   const [changePinError, setChangePinError] = useState('');
   const [changePinSuccess, setChangePinSuccess] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'dues' | 'utilities' | 'members'>('dues');
+  const [activeTab, setActiveTab] = useState<'dues' | 'utilities' | 'members' | 'notes'>('dues');
   const [currentCycle, setCurrentCycle] = useState<BillingCycle>(initialCycle);
   const [members, setMembers] = useState<Member[]>(initialMembers);
   const [isPending, startTransition] = useTransition();
+
+  // Important Notes State (Open to all roommates - No Admin PIN required)
+  const [importantNotes, setImportantNotes] = useState<ImportantNote[]>(initialImportantNotes);
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteContact, setNoteContact] = useState('');
+  const [noteDetails, setNoteDetails] = useState('');
+  const [noteCategory, setNoteCategory] = useState('CONTACT');
+  const [copiedNoteId, setCopiedNoteId] = useState<string | null>(null);
 
   // Handle PIN Unlock
   const handleUnlock = async (e: React.FormEvent) => {
@@ -433,6 +471,81 @@ export default function Dashboard({
     });
   };
 
+  // Important Notes Handlers (Open to all roommates - No Admin PIN required)
+  const handleCopyContact = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedNoteId(id);
+    setTimeout(() => {
+      setCopiedNoteId(null);
+    }, 2000);
+  };
+
+  const handleOpenAddNote = () => {
+    setEditingNoteId(null);
+    setNoteTitle('');
+    setNoteContact('');
+    setNoteDetails('');
+    setNoteCategory('CONTACT');
+    setNoteModalOpen(true);
+  };
+
+  const handleOpenEditNote = (note: ImportantNote) => {
+    setEditingNoteId(note.id);
+    setNoteTitle(note.title);
+    setNoteContact(note.contactNumber || '');
+    setNoteDetails(note.details || '');
+    setNoteCategory(note.category || 'CONTACT');
+    setNoteModalOpen(true);
+  };
+
+  const handleSaveNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!noteTitle.trim()) {
+      alert('Please enter a title');
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        if (editingNoteId) {
+          const updated = await updateImportantNote(editingNoteId, {
+            title: noteTitle,
+            contactNumber: noteContact,
+            details: noteDetails,
+            category: noteCategory,
+          });
+          setImportantNotes((prev) =>
+            prev.map((n) => (n.id === editingNoteId ? updated : n))
+          );
+        } else {
+          const created = await addImportantNote({
+            title: noteTitle,
+            contactNumber: noteContact,
+            details: noteDetails,
+            category: noteCategory,
+          });
+          setImportantNotes((prev) => [created, ...prev]);
+        }
+        setNoteModalOpen(false);
+      } catch (err) {
+        alert('Failed to save note');
+      }
+    });
+  };
+
+  const handleDeleteNote = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+
+    startTransition(async () => {
+      try {
+        await deleteImportantNote(id);
+        setImportantNotes((prev) => prev.filter((n) => n.id !== id));
+      } catch (err) {
+        alert('Failed to delete note');
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16">
       {/* Top Header */}
@@ -622,6 +735,21 @@ export default function Dashboard({
           >
             <Users className="w-4 h-4" />
             Members ({memberCount})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap ${
+              activeTab === 'notes'
+                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            Important Notes ({importantNotes.length})
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase tracking-wider">
+              Open
+            </span>
           </button>
         </div>
       </header>
@@ -1279,6 +1407,146 @@ export default function Dashboard({
             </div>
           </div>
         )}
+
+        {/* TAB 4: IMPORTANT CONTACTS & NOTES (OPEN ACCESS FOR ALL MEMBERS) */}
+        {activeTab === 'notes' && (
+          <div className="space-y-4">
+            {/* Header banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900">Important Contacts & Notes</h3>
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Open to All Roommates
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Save Maid numbers, Gas cylinder delivery, WiFi credentials, landlord, and mess notes.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenAddNote}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 shrink-0 self-start sm:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                Add Contact / Note
+              </button>
+            </div>
+
+            {/* Notes & Contacts Grid */}
+            {importantNotes.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center">
+                <BookOpen className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                <h4 className="font-bold text-slate-800 text-base">No important notes or numbers saved yet</h4>
+                <p className="text-xs text-slate-500 mt-1 mb-4 max-w-sm mx-auto">
+                  Add contacts like your maid/buya, gas cylinder supplier, or WiFi support number so all roommates can access them anytime.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleOpenAddNote}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors"
+                >
+                  Add First Contact / Note
+                </button>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {importantNotes.map((note) => {
+                  return (
+                    <div
+                      key={note.id}
+                      className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs hover:border-indigo-200 transition-all flex flex-col justify-between gap-3 group"
+                    >
+                      <div>
+                        {/* Title & Actions */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h4 className="font-bold text-slate-900 text-base leading-snug">
+                            {note.title}
+                          </h4>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditNote(note)}
+                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                              title="Edit note"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteNote(note.id, note.title)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="Delete note"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Phone Number with 1-tap Call & Copy */}
+                        {note.contactNumber && (
+                          <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 mb-2.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Phone className="w-4 h-4 text-indigo-600 shrink-0" />
+                              <span className="font-mono font-bold text-sm text-slate-800 truncate">
+                                {note.contactNumber}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleCopyContact(note.id, note.contactNumber!)}
+                                className="px-2 py-1 text-[11px] font-bold text-slate-600 hover:text-indigo-600 hover:bg-white rounded-md border border-transparent hover:border-slate-200 transition-all flex items-center gap-1"
+                                title="Copy number"
+                              >
+                                {copiedNoteId === note.id ? (
+                                  <>
+                                    <Check className="w-3 h-3 text-emerald-600" />
+                                    <span className="text-emerald-600 font-bold">Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3 h-3" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
+                              <a
+                                href={`tel:${note.contactNumber}`}
+                                className="px-2.5 py-1 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors flex items-center gap-1 shadow-2xs"
+                                title="Call now"
+                              >
+                                <PhoneCall className="w-3 h-3" />
+                                Call
+                              </a>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Details / Description */}
+                        {note.details && (
+                          <div className="text-xs text-slate-600 bg-amber-50/40 rounded-xl p-2.5 border border-amber-100/60 leading-relaxed whitespace-pre-wrap">
+                            {note.details}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer Info */}
+                      <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+                        <span>Accessible to all roommates</span>
+                        <span className="capitalize font-semibold text-slate-500">
+                          {note.category === 'CONTACT' ? 'Phone Contact' : 'Note'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* Add Utility Bill Modal */}
@@ -1863,6 +2131,123 @@ export default function Dashboard({
                   className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-md shadow-indigo-100 disabled:opacity-50"
                 >
                   Save PIN
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add / Edit Important Note Modal */}
+      {noteModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    {editingNoteId ? 'Edit Contact / Note' : 'Add Contact / Note'}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Open to all roommates • No PIN required
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setNoteModalOpen(false)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Quick Suggestions Chips */}
+            {!editingNoteId && (
+              <div className="mb-4">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                  Quick Presets
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {COMMON_NOTE_SUGGESTIONS.map((item) => (
+                    <button
+                      key={item.title}
+                      type="button"
+                      onClick={() => {
+                        setNoteTitle(item.title);
+                        setNoteCategory(item.category);
+                        if (!noteContact) setNoteContact(item.placeholderNumber);
+                        if (!noteDetails) setNoteDetails(item.placeholderDetails);
+                      }}
+                      className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40 text-slate-700 font-semibold transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveNote} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Title / Contact Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. বুয়ার নাম্বার, WiFi Support, গ্যাস সিলিন্ডার..."
+                  value={noteTitle}
+                  onChange={(e) => setNoteTitle(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Phone Number (Optional)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="e.g. 017xxxxxxxx or 096xxxxxxx"
+                  value={noteContact}
+                  onChange={(e) => setNoteContact(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Details / Instructions / Notes (Optional)
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="e.g. User ID: 10425, বুয়া সকাল ৭টায় আসে, শুক্রবার বন্ধ..."
+                  value={noteDetails}
+                  onChange={(e) => setNoteDetails(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setNoteModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-md shadow-indigo-100 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {editingNoteId ? 'Update Note' : 'Save Note'}
                 </button>
               </div>
             </form>
