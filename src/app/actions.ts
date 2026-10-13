@@ -395,3 +395,43 @@ export async function deleteImportantNote(id: string) {
   });
   revalidatePath('/');
 }
+
+// Toggle House Rent Payment to Landlord
+export async function toggleHouseRentPayment(
+  billingCycleId: string,
+  houseRentPaid: boolean,
+  note?: string
+) {
+  await requireAdmin();
+  const cycle = await prisma.billingCycle.update({
+    where: { id: billingCycleId },
+    data: {
+      houseRentPaid,
+      houseRentPaidAt: houseRentPaid ? new Date() : null,
+      houseRentPaidNote: houseRentPaid ? (note?.trim() || null) : null,
+    },
+  });
+
+  revalidatePath('/');
+  return cycle;
+}
+
+// Toggle Utility Bill Payment to Vendor/Provider
+export async function toggleUtilityBillPayment(
+  billId: string,
+  isPaid: boolean,
+  note?: string
+) {
+  await requireAdmin();
+  const bill = await prisma.utilityBill.update({
+    where: { id: billId },
+    data: {
+      isPaid,
+      paidAt: isPaid ? new Date() : null,
+      paidNote: isPaid ? (note?.trim() || null) : null,
+    },
+  });
+
+  revalidatePath('/');
+  return bill;
+}

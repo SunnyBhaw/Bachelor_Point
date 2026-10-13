@@ -24,6 +24,7 @@ import {
   Pencil,
   Copy,
   BookOpen,
+  Home,
 } from 'lucide-react';
 import {
   addMember,
@@ -39,6 +40,8 @@ import {
   addImportantNote,
   updateImportantNote,
   deleteImportantNote,
+  toggleHouseRentPayment,
+  toggleUtilityBillPayment,
 } from '@/app/actions';
 
 interface Member {
@@ -54,6 +57,9 @@ interface UtilityBill {
   totalAmount: number;
   collectedPerPerson: number;
   splitCount?: number | null;
+  isPaid?: boolean;
+  paidAt?: Date | string | null;
+  paidNote?: string | null;
 }
 
 interface MemberBilling {
@@ -69,6 +75,9 @@ interface BillingCycle {
   month: number;
   year: number;
   name: string;
+  houseRentPaid?: boolean;
+  houseRentPaidAt?: Date | string | null;
+  houseRentPaidNote?: string | null;
   bills: UtilityBill[];
   memberBillings: MemberBilling[];
 }
@@ -139,6 +148,10 @@ export default function Dashboard({
   const [noteDetails, setNoteDetails] = useState('');
   const [noteCategory, setNoteCategory] = useState('CONTACT');
   const [copiedNoteId, setCopiedNoteId] = useState<string | null>(null);
+
+  // House Rent Payout State
+  const [houseRentModalOpen, setHouseRentModalOpen] = useState(false);
+  const [houseRentNoteInput, setHouseRentNoteInput] = useState('');
 
   // Handle PIN Unlock
   const handleUnlock = async (e: React.FormEvent) => {
@@ -249,6 +262,16 @@ export default function Dashboard({
   const totalExpectedAmount = totalRoomRent + totalRoommatesUtility;
   const totalPaidAmount = currentCycle.memberBillings.reduce((acc, mb) => acc + mb.paidAmount, 0);
   const totalDuesPending = totalExpectedAmount - totalPaidAmount;
+
+  // Mess outgoing expenses & payouts (Landlord House Rent + Utility bills paid to providers)
+  const totalMessExpenses = totalRoomRent + totalBillsAmount;
+  const paidBillsAmount = currentCycle.bills
+    .filter((b) => b.isPaid)
+    .reduce((acc, b) => acc + b.totalAmount, 0);
+  const totalPaidOutExpenses =
+    (currentCycle.houseRentPaid ? totalRoomRent : 0) + paidBillsAmount;
+  const totalRemainingExpensesToPay = Math.max(0, totalMessExpenses - totalPaidOutExpenses);
+  const totalPaidBillsCount = currentCycle.bills.filter((b) => b.isPaid).length;
 
   // Handle Add Member
   const handleAddMember = async (e: React.FormEvent) => {
@@ -542,6 +565,100 @@ export default function Dashboard({
         setImportantNotes((prev) => prev.filter((n) => n.id !== id));
       } catch (err) {
         alert('Failed to delete note');
+      }
+    });
+  };
+
+  // House Rent & Utility Bill Outgoing Payments Handlers
+  const handleOpenHouseRentModal = () => {
+    if (!isAdmin) {
+      setPinModalOpen(true);
+      return;
+    }
+    setHouseRentNoteInput(currentCycle.houseRentPaidNote || '');
+    setHouseRentModalOpen(true);
+  };
+
+  const handleSaveHouseRentPayment = (e: React.FormEvent) => {
+    e.preventDefault();
+    startTransition(async () => {
+      try {
+        const updated = await toggleHouseRentPayment(
+          currentCycle.id,
+          true,
+          houseRentNoteInput
+        );
+        setCurrentCycle((prev) => ({
+          ...prev,
+          houseRentPaid: updated.houseRentPaid,
+          houseRentPaidAt: updated.houseRentPaidAt,
+          houseRentPaidNote: updated.houseRentPaidNote,
+        }));
+        setHouseRentModalOpen(false);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          alert(err.message);
+        } else {
+          alert('Failed to update house rent payment');
+        }
+      }
+    });
+  };
+
+  const handleMarkHouseRentUnpaid = () => {
+    if (!isAdmin) {
+      setPinModalOpen(true);
+      return;
+    }
+    if (!confirm('Mark house rent as unpaid/due to landlord?')) return;
+
+    startTransition(async () => {
+      try {
+        const updated = await toggleHouseRentPayment(currentCycle.id, false);
+        setCurrentCycle((prev) => ({
+          ...prev,
+          houseRentPaid: updated.houseRentPaid,
+          houseRentPaidAt: updated.houseRentPaidAt,
+          houseRentPaidNote: updated.houseRentPaidNote,
+        }));
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          alert(err.message);
+        } else {
+          alert('Failed to update house rent payment');
+        }
+      }
+    });
+  };
+
+  const handleToggleUtilityBill = (billId: string, newStatus: boolean) => {
+    if (!isAdmin) {
+      setPinModalOpen(true);
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const updated = await toggleUtilityBillPayment(billId, newStatus);
+        setCurrentCycle((prev) => ({
+          ...prev,
+          bills: prev.bills.map((b) =>
+            b.id === billId
+              ? {
+                  ...b,
+                  isPaid: updated.isPaid,
+                  paidAt: updated.paidAt,
+                  paidNote: updated.paidNote,
+                }
+              : b
+          ),
+        }));
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          alert(err.message);
+        } else {
+          alert('Failed to update bill payment status');
+        }
       }
     });
   };
@@ -880,12 +997,45 @@ export default function Dashboard({
         {/* TAB 1: MEMBER DUES & PAYMENTS */}
         {activeTab === 'dues' && (
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-1">
               <div>
                 <h2 className="text-lg font-bold text-slate-900">Member Dues & Payments</h2>
                 <p className="text-xs text-slate-500">
                   Room rent + Utility share (৳{Math.round(totalUtilitySharePerMember)}) = Total Due
                 </p>
+              </div>
+            </div>
+
+            {/* Quick House Rent & Payout Status Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <Home className="w-4 h-4" />
+                </div>
+                <span className="font-semibold text-slate-700">
+                  Apartment House Rent (৳{Math.round(totalRoomRent)}):
+                </span>
+                {currentCycle.houseRentPaid ? (
+                  <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Paid to Landlord ✓
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 font-bold text-rose-800 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" /> Due to Landlord ⏳
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto text-slate-500">
+                <span>Bills Paid: <strong className="text-slate-800">{totalPaidBillsCount}/{currentCycle.bills.length}</strong></span>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('utilities')}
+                  className="font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer touch-manipulation"
+                >
+                  View Payouts →
+                </button>
               </div>
             </div>
 
@@ -1063,6 +1213,141 @@ export default function Dashboard({
         {/* TAB 2: UTILITY BILLS & BALANCING */}
         {activeTab === 'utilities' && (
           <div className="space-y-6">
+            {/* Mess Outgoing Payouts Tracker (House Rent + Utilities) */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                      Mess Outgoing Payouts Tracker
+                    </h3>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                      {currentCycle.name}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Track when you gave House Rent to the Landlord and paid utility vendors.
+                  </p>
+                </div>
+
+                {/* Overall Payout Status Summary */}
+                <div className="flex items-center gap-2 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
+                  <span className="text-xs font-semibold text-slate-500">
+                    Paid Out:
+                  </span>
+                  <span className="text-xs font-extrabold text-emerald-600">
+                    ৳{Math.round(totalPaidOutExpenses)}
+                  </span>
+                  <span className="text-slate-300">/</span>
+                  <span className="text-xs font-bold text-slate-700">
+                    ৳{Math.round(totalMessExpenses)}
+                  </span>
+                  {totalRemainingExpensesToPay > 0 ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold ml-1">
+                      ৳{Math.round(totalRemainingExpensesToPay)} Due
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold ml-1">
+                      All Cleared ✓
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div>
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${totalMessExpenses > 0 ? Math.min(100, Math.round((totalPaidOutExpenses / totalMessExpenses) * 100)) : 0}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+                  <span>
+                    {totalMessExpenses > 0 ? Math.round((totalPaidOutExpenses / totalMessExpenses) * 100) : 0}% of total payouts completed
+                  </span>
+                  <span>
+                    {currentCycle.houseRentPaid ? '1/1 Rent' : '0/1 Rent'} • {totalPaidBillsCount}/{currentCycle.bills.length} Bills Paid
+                  </span>
+                </div>
+              </div>
+
+              {/* House Rent Card (Prominent) */}
+              <div
+                className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  currentCycle.houseRentPaid
+                    ? 'bg-emerald-50/60 border-emerald-200'
+                    : 'bg-rose-50/40 border-rose-200'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold ${
+                      currentCycle.houseRentPaid
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-rose-100 text-rose-700'
+                    }`}
+                  >
+                    <Home className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+                        House Rent to Landlord (বাড়িওয়ালার ভাড়া)
+                      </h4>
+                      {currentCycle.houseRentPaid ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold border border-emerald-300">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Paid to Landlord ✓
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-rose-100 text-rose-800 rounded-full font-bold border border-rose-300">
+                          <AlertCircle className="w-3 h-3 text-rose-600" /> Due to Landlord ⏳
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span>
+                        Total Apartment Rent: <strong className="text-slate-900">৳{Math.round(totalRoomRent)}</strong>
+                      </span>
+                      {currentCycle.houseRentPaid && currentCycle.houseRentPaidAt && (
+                        <span className="text-emerald-700 font-medium">
+                          • Paid on {new Date(currentCycle.houseRentPaidAt).toLocaleDateString()}
+                        </span>
+                      )}
+                      {currentCycle.houseRentPaidNote && (
+                        <span className="text-slate-500 italic">
+                          ({currentCycle.houseRentPaidNote})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action button */}
+                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                  {currentCycle.houseRentPaid ? (
+                    <button
+                      type="button"
+                      onClick={handleMarkHouseRentUnpaid}
+                      className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-white bg-white/80 border border-slate-200 rounded-xl transition-all cursor-pointer touch-manipulation"
+                    >
+                      Mark as Unpaid
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleOpenHouseRentModal}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer touch-manipulation"
+                    >
+                      <Check className="w-4 h-4" />
+                      Mark House Rent as Paid
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* Utility Bills List Header */}
             <div className="flex items-center justify-between">
@@ -1151,9 +1436,10 @@ export default function Dashboard({
                   return (
                     <div
                       key={bill.id}
-                      className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+                      className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col gap-3.5"
                     >
-                      {/* Left: Bill details */}
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        {/* Left: Bill details */}
                       <div className="min-w-[200px]">
                         <div className="flex flex-wrap items-center gap-2">
                           <h4 className="font-bold text-slate-900 text-base">{bill.name}</h4>
@@ -1326,6 +1612,52 @@ export default function Dashboard({
                             title="Delete bill"
                           >
                             <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Provider Payout Status & Quick Toggle */}
+                    <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-slate-500 font-semibold">
+                            Provider Payout:
+                          </span>
+                          {bill.isPaid ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-emerald-50 text-emerald-800 rounded-full font-bold border border-emerald-200">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              Paid to Provider ✓
+                              {bill.paidAt && (
+                                <span className="font-normal text-[10px] text-emerald-700 hidden sm:inline">
+                                  ({new Date(bill.paidAt).toLocaleDateString()})
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-amber-50 text-amber-800 rounded-full font-bold border border-amber-200">
+                              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                              Payment Pending ⏳
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Toggle button */}
+                        {bill.isPaid ? (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUtilityBill(bill.id, false)}
+                            className="px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-amber-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer touch-manipulation"
+                          >
+                            Mark Pending
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUtilityBill(bill.id, true)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer touch-manipulation"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Mark as Paid
                           </button>
                         )}
                       </div>
@@ -2316,6 +2648,78 @@ export default function Dashboard({
                   className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-md shadow-indigo-100 disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {editingNoteId ? 'Update Note' : 'Save Note'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Mark House Rent as Paid Modal */}
+      {houseRentModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <Home className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Mark House Rent Paid</h3>
+                  <p className="text-xs text-slate-500">Confirm payment to Landlord</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHouseRentModalOpen(false)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveHouseRentPayment} className="space-y-4 pt-4">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                <div className="flex justify-between items-center text-slate-600 mb-1">
+                  <span>Cycle:</span>
+                  <span className="font-bold text-slate-900">{currentCycle.name}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Total Rent to Landlord:</span>
+                  <span className="text-base font-extrabold text-indigo-600">
+                    ৳{Math.round(totalRoomRent)}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Payment Note / Method (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. bKash to Landlord, Cash, Bank..."
+                  value={houseRentNoteInput}
+                  onChange={(e) => setHouseRentNoteInput(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 outline-hidden"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setHouseRentModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md shadow-emerald-100 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  Confirm Paid
                 </button>
               </div>
             </form>

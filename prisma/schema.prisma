@@ -16,14 +16,17 @@ model Member {
 }
 
 model BillingCycle {
-  id             String          @id @default(cuid())
-  month          Int
-  year           Int
-  name           String
-  isClosed       Boolean         @default(false)
-  createdAt      DateTime        @default(now())
-  bills          UtilityBill[]
-  memberBillings MemberBilling[]
+  id                String          @id @default(cuid())
+  month             Int
+  year              Int
+  name              String
+  isClosed          Boolean         @default(false)
+  houseRentPaid     Boolean         @default(false)
+  houseRentPaidAt   DateTime?
+  houseRentPaidNote String?
+  createdAt         DateTime        @default(now())
+  bills             UtilityBill[]
+  memberBillings    MemberBilling[]
 
   @@unique([year, month])
 }
@@ -37,6 +40,9 @@ model UtilityBill {
   totalAmount        Float
   collectedPerPerson Float        // Custom collected per person (e.g. 165 or 285)
   splitCount         Int?         @default(0) // 0 or null = default all members, > 0 = custom count (e.g. 7 for gas with guest)
+  isPaid             Boolean      @default(false)
+  paidAt             DateTime?
+  paidNote           String?
   createdAt          DateTime     @default(now())
 }
 
