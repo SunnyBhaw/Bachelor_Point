@@ -396,13 +396,12 @@ export async function deleteImportantNote(id: string) {
   revalidatePath('/');
 }
 
-// Toggle House Rent Payment to Landlord
+// Toggle House Rent Payment to Landlord (Open to all roommates)
 export async function toggleHouseRentPayment(
   billingCycleId: string,
   houseRentPaid: boolean,
   note?: string
 ) {
-  await requireAdmin();
   const cycle = await prisma.billingCycle.update({
     where: { id: billingCycleId },
     data: {
@@ -416,13 +415,12 @@ export async function toggleHouseRentPayment(
   return cycle;
 }
 
-// Toggle Utility Bill Payment to Vendor/Provider
+// Toggle Utility Bill Payment to Vendor/Provider (Open to all roommates)
 export async function toggleUtilityBillPayment(
   billId: string,
   isPaid: boolean,
   note?: string
 ) {
-  await requireAdmin();
   const bill = await prisma.utilityBill.update({
     where: { id: billId },
     data: {
