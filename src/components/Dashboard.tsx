@@ -25,6 +25,8 @@ import {
   Copy,
   BookOpen,
   Home,
+  Menu,
+  X,
 } from 'lucide-react';
 import {
   addMember,
@@ -219,6 +221,8 @@ export default function Dashboard({
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileCycleModalOpen, setMobileCycleModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -230,6 +234,11 @@ export default function Dashboard({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleTabSwitch = (tab: 'dues' | 'utilities' | 'members' | 'notes') => {
+    setActiveTab(tab);
+    setMobileDrawerOpen(false);
+  };
 
   // Quick calculations
   const memberCount = members.length;
@@ -651,12 +660,13 @@ export default function Dashboard({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 sm:pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-12 sm:pb-16">
       {/* Top Header */}
       <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-5xl mx-auto px-3.5 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-3">
+          {/* Brand Logo & Title */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center bg-white shrink-0">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center bg-white shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo.png"
@@ -665,16 +675,16 @@ export default function Dashboard({
               />
             </div>
             <div>
-              <h1 className="text-base sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+              <h1 className="text-sm sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
                 Bachelor Point
               </h1>
             </div>
           </div>
 
-          {/* Month Navigator - Mobile Optimized */}
-          <div className="flex items-center gap-2">
-            {/* Custom Dropdown Trigger */}
-            <div className="relative" ref={dropdownRef}>
+          {/* Controls: Month Selector + Admin Lock/Unlock + Mobile Drawer Trigger */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Desktop Month Dropdown Trigger */}
+            <div className="hidden sm:block relative" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => setMonthDropdownOpen((prev) => !prev)}
@@ -693,7 +703,7 @@ export default function Dashboard({
                 />
               </button>
 
-              {/* Floating Menu Popover */}
+              {/* Floating Menu Popover (Desktop) */}
               {monthDropdownOpen && (
                 <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                   <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -748,9 +758,21 @@ export default function Dashboard({
               )}
             </div>
 
+            {/* Mobile Month Trigger (Opens Full Bottom Sheet) */}
+            <button
+              type="button"
+              onClick={() => setMobileCycleModalOpen(true)}
+              className="sm:hidden flex items-center gap-1 px-2 py-1.5 bg-slate-100 active:bg-slate-200 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 shrink-0"
+              title="Select Month"
+            >
+              <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span className="truncate max-w-[85px]">{currentCycle.name.split(' ')[0]}</span>
+              <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+            </button>
+
             {/* Admin Status Indicator & Lock / Unlock Toggle */}
             {isAdmin ? (
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 pl-2.5 pr-1.5 py-1.5 rounded-xl text-emerald-800 text-xs font-bold shadow-2xs shrink-0">
+              <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 pl-2 pr-1 py-1 rounded-xl text-emerald-800 text-xs font-bold shadow-2xs shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span className="hidden sm:inline">Admin</span>
                 <button
@@ -765,7 +787,7 @@ export default function Dashboard({
                   type="button"
                   onClick={handleLock}
                   title="Lock Admin Mode"
-                  className="px-2 py-0.5 text-[11px] bg-white border border-emerald-300 hover:border-rose-300 text-emerald-700 hover:text-rose-600 rounded-lg transition-colors font-bold cursor-pointer touch-manipulation"
+                  className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] bg-white border border-emerald-300 hover:border-rose-300 text-emerald-700 hover:text-rose-600 rounded-lg transition-colors font-bold cursor-pointer touch-manipulation"
                 >
                   Lock
                 </button>
@@ -774,41 +796,51 @@ export default function Dashboard({
               <button
                 type="button"
                 onClick={() => setPinModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 shrink-0 cursor-pointer touch-manipulation"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 shrink-0 cursor-pointer touch-manipulation"
               >
-                <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0 pointer-events-none" />
+                <Lock className="w-3 h-3 text-slate-500 shrink-0 pointer-events-none" />
                 <span className="pointer-events-none hidden sm:inline">Admin Unlock</span>
                 <span className="pointer-events-none sm:hidden">Unlock</span>
               </button>
             )}
+
+            {/* Mobile Hamburger Menu (☰) Trigger */}
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(true)}
+              aria-label="Open mobile navigation menu"
+              className="sm:hidden p-1.5 text-slate-700 hover:text-slate-900 active:bg-slate-100 rounded-xl border border-slate-200 bg-white shadow-2xs shrink-0 cursor-pointer touch-manipulation"
+            >
+              <Menu className="w-4 h-4 pointer-events-none" />
+            </button>
           </div>
         </div>
 
-        {/* Mobile Top Pill Segmented Switcher (< sm) */}
-        <div className="flex sm:hidden items-center justify-between border-t border-slate-100 bg-slate-50/80 px-2 py-1.5 gap-1 select-none">
+        {/* Mobile Top Sticky Segmented Tab Switcher (< sm) */}
+        <div className="flex sm:hidden items-center justify-between border-t border-slate-200 bg-white/95 backdrop-blur-md px-2 py-1.5 gap-1.5 select-none sticky top-[51px] z-20 shadow-xs">
           <button
             type="button"
-            onClick={() => setActiveTab('dues')}
-            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+            onClick={() => handleTabSwitch('dues')}
+            className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
               activeTab === 'dues'
-                ? 'bg-white text-indigo-600 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
             }`}
           >
             <CreditCard className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
             <span className="pointer-events-none">Dues</span>
             {totalDuesPending > 0 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 pointer-events-none" />
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 pointer-events-none ${activeTab === 'dues' ? 'bg-amber-300' : 'bg-rose-500'}`} />
             )}
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab('utilities')}
-            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+            onClick={() => handleTabSwitch('utilities')}
+            className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
               activeTab === 'utilities'
-                ? 'bg-white text-indigo-600 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
             }`}
           >
             <Receipt className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
@@ -817,11 +849,11 @@ export default function Dashboard({
 
           <button
             type="button"
-            onClick={() => setActiveTab('members')}
-            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+            onClick={() => handleTabSwitch('members')}
+            className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
               activeTab === 'members'
-                ? 'bg-white text-indigo-600 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
             }`}
           >
             <Users className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
@@ -830,17 +862,19 @@ export default function Dashboard({
 
           <button
             type="button"
-            onClick={() => setActiveTab('notes')}
-            className={`flex-1 py-1.5 px-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+            onClick={() => handleTabSwitch('notes')}
+            className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
               activeTab === 'notes'
-                ? 'bg-white text-indigo-600 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/60'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
             <span className="pointer-events-none">Notes</span>
             {importantNotes.length > 0 && (
-              <span className="px-1 py-0.2 rounded-full bg-emerald-500 text-[9px] font-extrabold text-white shrink-0 pointer-events-none">
+              <span className={`px-1 py-0.2 rounded-full text-[9px] font-extrabold shrink-0 pointer-events-none ${
+                activeTab === 'notes' ? 'bg-indigo-900 text-white' : 'bg-emerald-500 text-white'
+              }`}>
                 {importantNotes.length}
               </span>
             )}
@@ -927,55 +961,55 @@ export default function Dashboard({
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
+      <main id="dashboard-main-content" className="max-w-5xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6">
         {/* Quick Month Metrics Summary */}
-        <section aria-label="Monthly Financial Summary" className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <section aria-label="Monthly Financial Summary" className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Total Members
             </span>
-            <div className="text-2xl font-bold text-slate-900 mt-1 flex items-baseline gap-1">
+            <div className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1 flex items-baseline gap-1">
               {memberCount}
               <span className="text-xs text-slate-500 font-normal">Persons</span>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Utility Share / Person
             </span>
-            <div className="text-2xl font-bold text-indigo-600 mt-1">
+            <div className="text-lg sm:text-2xl font-bold text-indigo-600 mt-0.5 sm:mt-1">
               ৳{Math.round(totalUtilitySharePerMember)}
             </div>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[10px] sm:text-[11px] text-slate-500">
               {currentCycle.bills.length} bills added
             </span>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Total Collected
             </span>
-            <div className="text-2xl font-bold text-emerald-600 mt-1">
+            <div className="text-lg sm:text-2xl font-bold text-emerald-600 mt-0.5 sm:mt-1">
               ৳{Math.round(totalPaidAmount)}
             </div>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[10px] sm:text-[11px] text-slate-500">
               of ৳{Math.round(totalExpectedAmount)} expected
             </span>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <div className="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Total Dues Remaining
             </span>
             <div
-              className={`text-2xl font-bold mt-1 ${
+              className={`text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1 ${
                 totalDuesPending > 0 ? 'text-rose-600' : 'text-emerald-600'
               }`}
             >
               ৳{Math.max(0, Math.round(totalDuesPending))}
             </div>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[10px] sm:text-[11px] text-slate-500">
               {totalDuesPending <= 0 ? 'All dues cleared!' : 'To be collected'}
             </span>
           </div>
@@ -2717,96 +2751,284 @@ export default function Dashboard({
         </div>
       )}
 
-      {/* Mobile Fixed Bottom Navigation Bar */}
-      <nav
-        aria-label="Mobile Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 pt-1 pb-[max(0.6rem,env(safe-area-inset-bottom,0.6rem))] px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] sm:hidden"
-      >
-        <div className="grid grid-cols-4 items-center gap-1 max-w-md mx-auto select-none">
-          {/* Tab 1: Dues */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('dues')}
-            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
-              activeTab === 'dues'
-                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
-            }`}
-          >
-            <div className="relative pointer-events-none">
-              <CreditCard className={`w-5 h-5 transition-transform ${activeTab === 'dues' ? 'scale-110 text-indigo-600' : ''}`} />
-              {totalDuesPending > 0 && (
-                <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-              )}
-            </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Dues</span>
-          </button>
+      {/* Mobile Slide-Over Navigation Drawer (☰) */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-150 sm:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
 
-          {/* Tab 2: Bills */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('utilities')}
-            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
-              activeTab === 'utilities'
-                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
-            }`}
-          >
-            <div className="relative pointer-events-none">
-              <Receipt className={`w-5 h-5 transition-transform ${activeTab === 'utilities' ? 'scale-110 text-indigo-600' : ''}`} />
-              {currentCycle.bills.length > 0 && (
-                <span
-                  className={`absolute -top-1 -right-1.5 w-2 h-2 rounded-full ring-2 ring-white ${
-                    netUtilityAdjustment > 0
-                      ? 'bg-blue-500'
-                      : netUtilityAdjustment < 0
-                      ? 'bg-amber-500'
-                      : 'bg-emerald-500'
-                  }`}
-                />
-              )}
+          {/* Drawer Body */}
+          <div className="relative w-[85%] max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shadow-xs flex items-center justify-center bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo.png" alt="Logo" className="w-full h-full object-contain p-0.5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">Bachelor Point</h3>
+                  <p className="text-[11px] text-slate-500">Navigation Menu</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-700 active:bg-slate-200 rounded-xl"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Bills</span>
-          </button>
 
-          {/* Tab 3: Members */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('members')}
-            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
-              activeTab === 'members'
-                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
-            }`}
-          >
-            <div className="relative pointer-events-none">
-              <Users className={`w-5 h-5 transition-transform ${activeTab === 'members' ? 'scale-110 text-indigo-600' : ''}`} />
-            </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Members</span>
-          </button>
-
-          {/* Tab 4: Notes */}
-          <button
-            type="button"
-            onClick={() => setActiveTab('notes')}
-            className={`flex flex-col items-center justify-center min-h-[50px] py-1 px-1 rounded-xl transition-colors cursor-pointer touch-manipulation active:bg-indigo-100/60 ${
-              activeTab === 'notes'
-                ? 'text-indigo-600 font-bold bg-indigo-50/80 shadow-2xs'
-                : 'text-slate-500 hover:text-slate-700 active:bg-slate-100'
-            }`}
-          >
-            <div className="relative pointer-events-none">
-              <BookOpen className={`w-5 h-5 transition-transform ${activeTab === 'notes' ? 'scale-110 text-indigo-600' : ''}`} />
-              {importantNotes.length > 0 && (
-                <span className="absolute -top-1 -right-1.5 px-1 min-w-[14px] h-[14px] rounded-full bg-emerald-500 text-[9px] font-extrabold text-white flex items-center justify-center ring-2 ring-white">
-                  {importantNotes.length}
+            {/* Quick Cycle Bar in Drawer */}
+            <div className="p-4 bg-indigo-50/60 border-b border-indigo-100 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider block">
+                  Current Billing Cycle
                 </span>
-              )}
+                <span className="text-sm font-bold text-slate-900">{currentCycle.name}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileDrawerOpen(false);
+                  setMobileCycleModalOpen(true);
+                }}
+                className="px-2.5 py-1 text-xs font-bold bg-white text-indigo-600 rounded-lg border border-indigo-200 shadow-2xs active:bg-indigo-50"
+              >
+                Switch Month
+              </button>
             </div>
-            <span className="text-[10px] mt-1 font-semibold leading-none pointer-events-none">Notes</span>
-          </button>
+
+            {/* Navigation Tab Links */}
+            <div className="p-3 space-y-1.5 flex-1 overflow-y-auto">
+              <div className="px-3 pt-2 pb-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Sections
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('dues')}
+                className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer touch-manipulation ${
+                  activeTab === 'dues'
+                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <CreditCard className={`w-4 h-4 ${activeTab === 'dues' ? 'text-white' : 'text-slate-500'}`} />
+                  <span>Member Dues & Payments</span>
+                </div>
+                {totalDuesPending > 0 && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                    activeTab === 'dues' ? 'bg-indigo-800 text-white' : 'bg-rose-100 text-rose-700'
+                  }`}>
+                    ৳{Math.round(totalDuesPending)} Due
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('utilities')}
+                className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer touch-manipulation ${
+                  activeTab === 'utilities'
+                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Receipt className={`w-4 h-4 ${activeTab === 'utilities' ? 'text-white' : 'text-slate-500'}`} />
+                  <span>Utility Bills & Split</span>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'utilities'
+                    ? 'bg-indigo-800 text-white'
+                    : netUtilityAdjustment >= 0
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {netUtilityAdjustment >= 0 ? `+৳${netUtilityAdjustment.toFixed(0)}` : `-৳${Math.abs(netUtilityAdjustment).toFixed(0)}`}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('members')}
+                className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer touch-manipulation ${
+                  activeTab === 'members'
+                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Users className={`w-4 h-4 ${activeTab === 'members' ? 'text-white' : 'text-slate-500'}`} />
+                  <span>Members Directory</span>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'members' ? 'bg-indigo-800 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {memberCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('notes')}
+                className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer touch-manipulation ${
+                  activeTab === 'notes'
+                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <BookOpen className={`w-4 h-4 ${activeTab === 'notes' ? 'text-white' : 'text-slate-500'}`} />
+                  <span>Important Notes & Contacts</span>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'notes' ? 'bg-indigo-800 text-white' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  {importantNotes.length} Notes
+                </span>
+              </button>
+
+              {/* Admin Mode Box */}
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <div className="px-3 pb-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Admin Access
+                </div>
+                {isAdmin ? (
+                  <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                        Admin Mode Active
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileDrawerOpen(false);
+                          handleLock();
+                        }}
+                        className="px-2 py-0.5 bg-white border border-rose-300 text-rose-600 rounded text-xs font-bold"
+                      >
+                        Lock
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileDrawerOpen(false);
+                        setChangePinModalOpen(true);
+                      }}
+                      className="w-full text-center py-1.5 bg-white border border-emerald-300 text-emerald-700 rounded-lg text-xs font-bold"
+                    >
+                      Change Admin PIN
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      setPinModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 p-3 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs border border-slate-200 active:bg-slate-200"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Unlock Admin Mode
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+              <span>Bachelor Point Mess</span>
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(false)}
+                className="font-bold text-indigo-600 active:underline"
+              >
+                Close Menu
+              </button>
+            </div>
+          </div>
         </div>
-      </nav>
+      )}
+
+      {/* Mobile Billing Cycle Selector Modal / Bottom Sheet */}
+      {mobileCycleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-150">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileCycleModalOpen(false)}
+          />
+          <div className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 z-10 max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-bold text-slate-900 text-base">Select Billing Cycle</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileCycleModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="py-3 space-y-1.5 overflow-y-auto max-h-[50vh]">
+              {initialCycles.map((c) => {
+                const isSelected = c.year === currentCycle.year && c.month === currentCycle.month;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setMobileCycleModalOpen(false);
+                      window.location.href = `/?year=${c.year}&month=${c.month}`;
+                    }}
+                    className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-semibold transition-colors ${
+                      isSelected
+                        ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-200'
+                        : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100 border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          isSelected ? 'bg-indigo-600' : 'bg-slate-300'
+                        }`}
+                      />
+                      <span>{c.name}</span>
+                    </div>
+                    {isSelected && <Check className="w-5 h-5 text-indigo-600" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileCycleModalOpen(false);
+                  setNewMonthModalOpen(true);
+                }}
+                className="w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-sm rounded-xl flex items-center justify-center gap-2 active:bg-indigo-200 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Create New Month Cycle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
