@@ -1027,39 +1027,6 @@ export default function Dashboard({
               </div>
             </div>
 
-            {/* Quick House Rent & Payout Status Banner */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-white rounded-xl border border-slate-200 text-xs shadow-xs">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                  <Home className="w-4 h-4" />
-                </div>
-                <span className="font-semibold text-slate-700">
-                  Apartment House Rent (৳{Math.round(totalRoomRent)}):
-                </span>
-                {currentCycle.houseRentPaid ? (
-                  <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Paid to Landlord ✓
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 font-bold text-rose-800 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" /> Due to Landlord ⏳
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-auto text-slate-500">
-                <span>Bills Paid: <strong className="text-slate-800">{totalPaidBillsCount}/{currentCycle.bills.length}</strong></span>
-                <span>•</span>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('utilities')}
-                  className="font-bold text-indigo-600 hover:text-indigo-700 hover:underline cursor-pointer touch-manipulation"
-                >
-                  View Payouts →
-                </button>
-              </div>
-            </div>
-
             {currentCycle.memberBillings.length === 0 ? (
               <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
                 <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
