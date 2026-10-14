@@ -28,68 +28,68 @@ export default function HouseRentModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="bg-[#FDFBF7] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-[#E8DFC8] animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E8DFC8]">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <div className="w-9 h-9 rounded-2xl bg-[#E2EBDD] text-[#2D5A27] flex items-center justify-center font-bold">
               <Home className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Mark House Rent Paid</h3>
-              <p className="text-xs text-slate-500">Open to all roommates • No PIN required</p>
+              <h3 className="text-base font-extrabold text-[#2C241E]">বাড়ি ভাড়া পরিশোধ মার্ক</h3>
+              <p className="text-xs text-[#8C7A6B]">সকল রুমমেটের জন্য উন্মুক্ত • পিন প্রয়োজন নেই</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center text-sm font-bold cursor-pointer"
+            className="w-7 h-7 rounded-lg text-[#8C7A6B] hover:text-[#2C241E] hover:bg-[#F3ECE1] flex items-center justify-center text-sm font-bold cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         <form onSubmit={onSaveHouseRentPayment} className="space-y-4 pt-4">
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
-            <div className="flex justify-between items-center text-slate-600 mb-1">
-              <span>Cycle:</span>
-              <span className="font-bold text-slate-900">{cycleName}</span>
+          <div className="bg-[#FAF7F2] p-3 rounded-2xl border border-[#E8DFC8] text-xs">
+            <div className="flex justify-between items-center text-[#8C7A6B] mb-1">
+              <span>মাসিক সাইকেল:</span>
+              <span className="font-bold text-[#2C241E]">{cycleName}</span>
             </div>
-            <div className="flex justify-between items-center text-slate-600">
-              <span>Total Rent to Landlord:</span>
-              <span className="text-base font-extrabold text-indigo-600">
+            <div className="flex justify-between items-center text-[#8C7A6B]">
+              <span>বাড়িওয়ালার মোট ভাড়া:</span>
+              <span className="text-base font-black text-[#C25E3E] font-mono">
                 ৳{Math.round(totalRoomRent)}
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Payment Note / Method (Optional)
+            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
+              পরিশোধের মাধ্যম / নোট (ঐচ্ছিক)
             </label>
             <input
               type="text"
-              placeholder="e.g. bKash to Landlord, Cash, Bank..."
+              placeholder="যেমন: বাড়িওয়ালার বিকাশ, ক্যাশ, বা ব্যাংক ট্রান্সফার..."
               value={houseRentNoteInput}
               onChange={(e) => setHouseRentNoteInput(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 outline-hidden"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden bg-white text-[#2C241E]"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E8DFC8]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-[#8C7A6B] hover:bg-[#F3ECE1] rounded-xl transition-colors cursor-pointer"
             >
-              Cancel
+              বাতিল
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md shadow-emerald-100 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2.5 text-xs font-bold bg-[#2D5A27] hover:bg-[#23491E] text-white rounded-xl transition-all shadow-2xs disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
             >
               <Check className="w-4 h-4" />
-              Confirm Paid
+              পরিশোধ নিশ্চিত করুন
             </button>
           </div>
         </form>

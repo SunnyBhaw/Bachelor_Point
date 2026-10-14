@@ -666,7 +666,7 @@ export default function Dashboard({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-12 sm:pb-16">
+    <div className="min-h-screen bg-[#FBF9F5] text-[#2C241E] pb-12 sm:pb-16">
       {/* Top Header & Navigation */}
       <Header
         currentCycle={currentCycle}

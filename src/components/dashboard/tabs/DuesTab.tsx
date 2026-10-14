@@ -9,7 +9,12 @@ import {
   Check,
   RotateCcw,
 } from 'lucide-react';
-import { BillingCycle, MemberBilling } from '../types';
+import {
+  BillingCycle,
+  MemberBilling,
+  getAvatarColor,
+  getInitials,
+} from '../types';
 
 interface DuesTabProps {
   currentCycle: BillingCycle;
@@ -37,34 +42,35 @@ export default function DuesTab({
   const handleCopyWhatsAppSummary = () => {
     if (memberBillings.length === 0) return;
 
-    let text = `🏠 *Bachelor Point - ${currentCycle.name} Dues Breakdown*\n`;
-    text += `⚡ Utility Share per Member: ৳${Math.round(totalUtilitySharePerMember)}\n\n`;
+    let text = `🏠 *ব্যাচেলর পয়েন্ট - ${currentCycle.name} ভাড়ার হিসাব*\n`;
+    text += `⚡ মাথাপিছু ইউটিলিটি শেয়ার: ৳${Math.round(totalUtilitySharePerMember)}\n\n`;
 
     memberBillings.forEach((mb) => {
       const totalDue = mb.roomRent + totalUtilitySharePerMember;
       const balance = totalDue - mb.paidAmount;
-      const statusText = balance <= 0 ? '✅ Paid' : `⚠️ Due: ৳${Math.round(balance)}`;
-      text += `• *${mb.member.name}*: Total ৳${Math.round(totalDue)} (Rent: ৳${mb.roomRent} + Util: ৳${Math.round(totalUtilitySharePerMember)}) | Paid: ৳${mb.paidAmount} [${statusText}]\n`;
+      const statusText = balance <= 0 ? '✅ পরিশোধিত' : `⚠️ বাকি: ৳${Math.round(balance)}`;
+      text += `• *${mb.member.name}*: মোট ৳${Math.round(totalDue)} (ভাড়া: ৳${mb.roomRent} + ইউটিলিটি: ৳${Math.round(totalUtilitySharePerMember)}) | জমা: ৳${mb.paidAmount} [${statusText}]\n`;
     });
 
     const totalCollected = memberBillings.reduce((acc, mb) => acc + mb.paidAmount, 0);
     const totalExpected = memberBillings.reduce((acc, mb) => acc + mb.roomRent + totalUtilitySharePerMember, 0);
     const totalRemaining = Math.max(0, totalExpected - totalCollected);
 
-    text += `\n💰 *Total Collected*: ৳${Math.round(totalCollected)} / ৳${Math.round(totalExpected)}`;
-    text += `\n⏳ *Remaining Due*: ৳${Math.round(totalRemaining)}`;
+    text += `\n💰 *মোট জমা*: ৳${Math.round(totalCollected)} / ৳${Math.round(totalExpected)}`;
+    text += `\n⏳ *পরিশোধ বাকি*: ৳${Math.round(totalRemaining)}`;
 
     navigator.clipboard.writeText(text);
-    onShowToast('Dues summary copied to clipboard for WhatsApp! 📋', 'success');
+    onShowToast('হোয়াটসঅ্যাপ সামারি কপি করা হয়েছে! 📋', 'success');
   };
 
   return (
     <div className="space-y-4">
+      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-1">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Member Dues & Payments</h2>
-          <p className="text-xs text-slate-500">
-            Room rent + Utility share (৳{Math.round(totalUtilitySharePerMember)}) = Total Due
+          <h2 className="text-lg font-extrabold text-[#2C241E]">Member Dues & Payments (ভাড়া ও বিল)</h2>
+          <p className="text-xs text-[#8C7A6B]">
+            রুম ভাড়া + ইউটিলিটি শেয়ার (৳{Math.round(totalUtilitySharePerMember)}) = মোট প্রদেয়
           </p>
         </div>
 
@@ -72,80 +78,92 @@ export default function DuesTab({
           <button
             type="button"
             onClick={handleCopyWhatsAppSummary}
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 shadow-2xs transition-colors cursor-pointer touch-manipulation"
+            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-[#C25E3E] bg-[#FDF2EC] hover:bg-[#F8EBE3] active:bg-[#F3E0D5] border border-[#F7D5C9] shadow-2xs transition-colors cursor-pointer touch-manipulation"
           >
-            <Copy className="w-3.5 h-3.5 text-indigo-600" />
+            <Copy className="w-3.5 h-3.5 text-[#C25E3E]" />
             <span>Copy WhatsApp Summary</span>
           </button>
         )}
       </div>
 
       {memberBillings.length === 0 ? (
-        <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
-          <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-          <h3 className="font-bold text-slate-800 text-base">No members registered yet</h3>
-          <p className="text-sm text-slate-500 mt-1 mb-4">
-            Add members in the Members tab to start managing dues.
+        <div className="bg-white rounded-2xl border border-dashed border-[#DDD3C2] p-10 text-center">
+          <Users className="w-12 h-12 text-[#8C7A6B] mx-auto mb-3" />
+          <h3 className="font-bold text-[#2C241E] text-base">কোন মেম্বার এখনো যুক্ত করা হয়নি</h3>
+          <p className="text-sm text-[#8C7A6B] mt-1 mb-4">
+            ভাড়া ও বিল হিসাব পরিচালনা করতে প্রথমে সদস্য যুক্ত করুন।
           </p>
           <button
             type="button"
             onClick={onNavigateToMembers}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 cursor-pointer"
+            className="px-4 py-2 bg-[#C25E3E] text-white rounded-xl text-sm font-bold hover:bg-[#B05133] cursor-pointer"
           >
-            Go to Members
+            সদস্য তালিকায় যান
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="divide-y divide-slate-100">
-            {memberBillings.map((mb) => {
+        <div className="bg-white rounded-2xl border border-[#E8DFC8] shadow-2xs overflow-hidden">
+          <div className="divide-y divide-[#F2ECE1]">
+            {memberBillings.map((mb, idx) => {
               const totalDue = mb.roomRent + totalUtilitySharePerMember;
               const balance = totalDue - mb.paidAmount;
               const isPaid = balance <= 0 && totalDue > 0;
               const isPartial = balance > 0 && mb.paidAmount > 0;
+              const avatar = getAvatarColor(idx);
+              const initials = getInitials(mb.member.name);
 
               return (
                 <div
                   key={mb.id}
-                  className="p-4 sm:p-5 hover:bg-slate-50/60 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="p-4 sm:p-5 hover:bg-[#FDFBF7] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
-                  {/* Member Info */}
-                  <div className="min-w-[170px]">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-900 text-base">{mb.member.name}</h3>
-                      {isPaid && (
-                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Paid
-                        </span>
-                      )}
-                      {isPartial && (
-                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-bold">
-                          Partial
-                        </span>
-                      )}
-                      {!isPaid && !isPartial && totalDue > 0 && (
-                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-rose-100 text-rose-800 rounded-full font-bold">
-                          Unpaid
-                        </span>
-                      )}
+                  {/* Member Info with Friendly Colored Avatar */}
+                  <div className="min-w-[190px] flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xs shrink-0 border shadow-2xs ${avatar.bg} ${avatar.text} ${avatar.border}`}
+                    >
+                      {initials}
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
-                      <a
-                        href={`tel:${mb.member.phone}`}
-                        className="hover:text-indigo-600 hover:underline"
-                      >
-                        {mb.member.phone}
-                      </a>
+
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="font-bold text-[#2C241E] text-base leading-tight">
+                          {mb.member.name}
+                        </h3>
+                        {isPaid && (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-[#E2EBDD] text-[#2D5A27] border border-[#CFDEC8] rounded-full font-bold">
+                            <CheckCircle2 className="w-3 h-3 text-[#2D5A27]" /> পরিশোধিত
+                          </span>
+                        )}
+                        {isPartial && (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-[#FDF0D5] text-[#9C6500] border border-[#F2D79E] rounded-full font-bold">
+                            আংশিক জমা
+                          </span>
+                        )}
+                        {!isPaid && !isPartial && totalDue > 0 && (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-[#FDF2EC] text-[#B33A3A] border border-[#F7D5C9] rounded-full font-bold">
+                            বাকি
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-[#8C7A6B] mt-0.5">
+                        <Phone className="w-3.5 h-3.5 text-[#8C7A6B]" />
+                        <a
+                          href={`tel:${mb.member.phone}`}
+                          className="hover:text-[#C25E3E] hover:underline font-mono"
+                        >
+                          {mb.member.phone}
+                        </a>
+                      </div>
                     </div>
                   </div>
 
                   {/* Financial Breakup & Inputs */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1 items-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 flex-1 items-center">
                     {/* Room Rent */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                        Room Rent (৳)
+                      <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
+                        রুম ভাড়া (৳)
                       </label>
                       {isAdmin ? (
                         <input
@@ -159,10 +177,10 @@ export default function DuesTab({
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          className="w-full px-3 py-1.5 text-sm font-semibold rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-hidden bg-slate-50/50"
+                          className="w-full px-3 py-1.5 text-sm font-bold rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] focus:ring-1 focus:ring-[#C25E3E] outline-hidden bg-[#FAF7F2] font-mono"
                         />
                       ) : (
-                        <div className="px-3 py-1.5 text-sm font-semibold rounded-lg bg-slate-50 text-slate-800 border border-slate-200">
+                        <div className="px-3 py-1.5 text-sm font-bold rounded-xl bg-[#FAF7F2] text-[#2C241E] border border-[#E8DFC8] font-mono">
                           ৳{mb.roomRent || 0}
                         </div>
                       )}
@@ -170,28 +188,28 @@ export default function DuesTab({
 
                     {/* Utility Share */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                        Utility Share (৳)
+                      <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
+                        ইউটিলিটি শেয়ার (৳)
                       </label>
-                      <div className="px-3 py-1.5 text-sm font-semibold rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                      <div className="px-3 py-1.5 text-sm font-bold rounded-xl bg-[#F3ECE1] text-[#7A6A5C] border border-[#E8DFC8] font-mono">
                         ৳{Math.round(totalUtilitySharePerMember)}
                       </div>
                     </div>
 
                     {/* Total Due */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                        Total Due (৳)
+                      <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
+                        মোট প্রদেয় (৳)
                       </label>
-                      <div className="px-3 py-1.5 text-sm font-bold text-slate-900 bg-slate-100 rounded-lg border border-slate-200">
+                      <div className="px-3 py-1.5 text-sm font-extrabold text-[#2C241E] bg-[#EFE9DF] rounded-xl border border-[#DDD3C2] font-mono">
                         ৳{Math.round(totalDue)}
                       </div>
                     </div>
 
                     {/* Paid Amount */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                        Paid Amount (৳)
+                      <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
+                        জমা দিয়েছেন (৳)
                       </label>
                       {isAdmin ? (
                         <input
@@ -205,10 +223,10 @@ export default function DuesTab({
                               parseFloat(e.target.value) || 0
                             )
                           }
-                          className="w-full px-3 py-1.5 text-sm font-semibold rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-hidden bg-white text-emerald-700 font-mono"
+                          className="w-full px-3 py-1.5 text-sm font-bold rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] focus:ring-1 focus:ring-[#C25E3E] outline-hidden bg-white text-[#2D5A27] font-mono"
                         />
                       ) : (
-                        <div className="px-3 py-1.5 text-sm font-bold rounded-lg bg-slate-50 text-emerald-700 border border-slate-200 font-mono">
+                        <div className="px-3 py-1.5 text-sm font-bold rounded-xl bg-[#FAF7F2] text-[#2D5A27] border border-[#E8DFC8] font-mono">
                           ৳{mb.paidAmount || 0}
                         </div>
                       )}
@@ -216,21 +234,21 @@ export default function DuesTab({
                   </div>
 
                   {/* Balance Due & 1-Tap Quick Actions */}
-                  <div className="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                  <div className="flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-[#F2ECE1]">
                     <div className="text-right">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                        Remaining Due
+                      <span className="text-[10px] uppercase font-bold text-[#8C7A6B] block">
+                        বাকি টাকা (Due)
                       </span>
                       <span
-                        className={`text-base font-extrabold ${
+                        className={`text-base font-black font-mono ${
                           balance > 0
-                            ? 'text-rose-600'
+                            ? 'text-[#B33A3A]'
                             : balance < 0
-                            ? 'text-blue-600'
-                            : 'text-emerald-600'
+                            ? 'text-[#2A6185]'
+                            : 'text-[#2D5A27]'
                         }`}
                       >
-                        {balance > 0 ? `৳${Math.round(balance)}` : balance < 0 ? `-৳${Math.abs(Math.round(balance))} (Adv)` : '৳0'}
+                        {balance > 0 ? `৳${Math.round(balance)}` : balance < 0 ? `-৳${Math.abs(Math.round(balance))} (অগ্রিম)` : '৳০'}
                       </span>
                     </div>
 
@@ -241,19 +259,19 @@ export default function DuesTab({
                           <button
                             type="button"
                             onClick={() => onQuickFullPay(mb, totalDue)}
-                            title="Mark as 100% Fully Paid"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer touch-manipulation whitespace-nowrap active:scale-95"
+                            title="সম্পূর্ণ পরিশোধ হিসেবে চিহ্নিত করুন"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-[#C25E3E] hover:bg-[#B05133] active:bg-[#9C452B] text-white rounded-xl shadow-2xs transition-all cursor-pointer touch-manipulation whitespace-nowrap active:scale-95"
                           >
                             <Check className="w-3.5 h-3.5" />
-                            <span>Mark Full</span>
+                            <span>পরিশোধ মার্ক</span>
                           </button>
                         )}
                         {mb.paidAmount > 0 && (
                           <button
                             type="button"
                             onClick={() => onQuickResetPay(mb)}
-                            title="Reset payment to 0"
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            title="জমা শূন্য (Reset) করুন"
+                            className="p-1.5 text-[#8C7A6B] hover:text-[#B33A3A] hover:bg-[#FDF2EC] rounded-lg transition-colors cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>

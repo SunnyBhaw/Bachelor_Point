@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Receipt, X } from 'lucide-react';
+import { Receipt } from 'lucide-react';
 import { COMMON_BILLS_SUGGESTIONS } from '../types';
 
 interface BillModalProps {
@@ -43,16 +43,21 @@ export default function BillModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-bold text-slate-900 text-base">Add Utility Bill</h3>
+      <div className="bg-[#FDFBF7] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E8DFC8] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E8DFC8]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-[#F5E5DC] text-[#C25E3E] flex items-center justify-center">
+              <Receipt className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-[#2C241E] text-base">নতুন ইউটিলিটি বিল যোগ</h3>
+              <p className="text-xs text-[#8C7A6B]">মেস খরচের নতুন বিল যুক্ত ও শেয়ার করুন</p>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center text-sm font-bold cursor-pointer"
+            className="w-7 h-7 rounded-lg text-[#8C7A6B] hover:text-[#2C241E] hover:bg-[#F3ECE1] flex items-center justify-center text-sm font-bold cursor-pointer"
           >
             ✕
           </button>
@@ -60,8 +65,8 @@ export default function BillModal({
 
         {/* Quick Suggestion Chips */}
         <div className="mt-4">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-            Quick Suggestions
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A6B] mb-1.5">
+            সরাসরি নির্বাচন করুন (Quick Suggestions)
           </label>
           <div className="flex flex-wrap gap-1.5">
             {COMMON_BILLS_SUGGESTIONS.map((item) => (
@@ -73,7 +78,7 @@ export default function BillModal({
                   setNewBillType(item.type);
                   onAmountChange(item.defaultAmount);
                 }}
-                className="text-xs px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 text-slate-700 font-medium transition-colors cursor-pointer"
+                className="text-xs px-2.5 py-1 rounded-xl border border-[#DDD3C2] bg-white hover:bg-[#F5E5DC] hover:border-[#E8C2B3] text-[#2C241E] font-semibold transition-colors cursor-pointer"
               >
                 {item.name}
               </button>
@@ -83,65 +88,65 @@ export default function BillModal({
 
         <form onSubmit={onSubmit} className="space-y-4 pt-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Bill Name
+            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
+              বিলের নাম
             </label>
             <input
               type="text"
-              placeholder="e.g. WiFi, Current, Maid..."
+              placeholder="যেমন: ওয়াইফাই বিল, কারেন্ট বিল, বুয়া বিল..."
               value={newBillName}
               onChange={(e) => setNewBillName(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden bg-white"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Bill Type
+            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
+              বিলের ধরন (Type)
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setNewBillType('FIXED')}
-                className={`py-2 px-3 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                className={`py-2 px-3 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
                   newBillType === 'FIXED'
-                    ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-[#F5E5DC] border-[#C25E3E] text-[#C25E3E]'
+                    : 'border-[#DDD3C2] bg-white text-[#7A6A5C] hover:bg-[#FAF7F2]'
                 }`}
               >
-                Fixed Monthly
+                ফিক্সড মাসিক (Fixed)
               </button>
               <button
                 type="button"
                 onClick={() => setNewBillType('VARIABLE')}
-                className={`py-2 px-3 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                className={`py-2 px-3 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
                   newBillType === 'VARIABLE'
-                    ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-[#FDF0D5] border-[#D97706] text-[#9C6500]'
+                    : 'border-[#DDD3C2] bg-white text-[#7A6A5C] hover:bg-[#FAF7F2]'
                 }`}
               >
-                Variable / Usage
+                পরিবর্তনশীল (Variable)
               </button>
             </div>
           </div>
 
-          {/* Custom Split People Count (Includes Meal Guests) */}
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+          {/* Custom Split People Count */}
+          <div className="bg-[#FAF7F2] p-3 rounded-2xl border border-[#E8DFC8] space-y-2">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-xs font-bold text-slate-800">
-                  Shared Between (Split Count)
+                <label className="block text-xs font-bold text-[#2C241E]">
+                  ভাগ হবে (সদস্য ও মিল গেস্ট)
                 </label>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-[#8C7A6B]">
                   {newBillSplitCount > memberCount ? (
-                    <span className="text-amber-700 font-semibold">
-                      {memberCount} roommates + {newBillSplitCount - memberCount} meal guest(s)
+                    <span className="text-[#9C6500] font-semibold">
+                      {memberCount} রুমমেট + {newBillSplitCount - memberCount} মিল গেস্ট
                     </span>
                   ) : newBillSplitCount === memberCount ? (
-                    'All room residents'
+                    'সকল রুমমেটের মধ্যে সমবণ্টন'
                   ) : (
-                    `${newBillSplitCount} of ${memberCount} roommates`
+                    `${newBillSplitCount} জনের মধ্যে বণ্টন`
                   )}
                 </span>
               </div>
@@ -149,17 +154,17 @@ export default function BillModal({
                 <button
                   type="button"
                   onClick={() => onSplitCountChange(Math.max(1, newBillSplitCount - 1))}
-                  className="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold cursor-pointer"
+                  className="w-7 h-7 rounded-lg bg-white border border-[#DDD3C2] hover:bg-[#F3ECE1] flex items-center justify-center text-[#2C241E] font-bold cursor-pointer"
                 >
                   -
                 </button>
-                <span className="w-8 text-center text-sm font-bold font-mono text-indigo-700">
+                <span className="w-8 text-center text-sm font-bold font-mono text-[#C25E3E]">
                   {newBillSplitCount}
                 </span>
                 <button
                   type="button"
                   onClick={() => onSplitCountChange(newBillSplitCount + 1)}
-                  className="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold cursor-pointer"
+                  className="w-7 h-7 rounded-lg bg-white border border-[#DDD3C2] hover:bg-[#F3ECE1] flex items-center justify-center text-[#2C241E] font-bold cursor-pointer"
                 >
                   +
                 </button>
@@ -167,50 +172,50 @@ export default function BillModal({
             </div>
 
             {/* Quick Presets for Split */}
-            <div className="flex items-center gap-1.5 pt-1 border-t border-slate-200/80">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Presets:</span>
+            <div className="flex items-center gap-1.5 pt-1 border-t border-[#E8DFC8]">
+              <span className="text-[10px] uppercase font-bold text-[#8C7A6B]">প্রিসেট:</span>
               <button
                 type="button"
                 onClick={() => onSplitCountChange(memberCount)}
-                className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border cursor-pointer ${
+                className={`text-[11px] px-2.5 py-0.5 rounded-lg font-semibold border cursor-pointer ${
                   newBillSplitCount === memberCount
-                    ? 'bg-indigo-600 text-white border-indigo-600'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    ? 'bg-[#C25E3E] text-white border-[#C25E3E]'
+                    : 'bg-white text-[#7A6A5C] border-[#DDD3C2] hover:bg-[#FAF7F2]'
                 }`}
               >
-                {memberCount} Roommates
+                {memberCount} জন রুমমেট
               </button>
               <button
                 type="button"
                 onClick={() => onSplitCountChange(memberCount + 1)}
-                className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border cursor-pointer ${
+                className={`text-[11px] px-2.5 py-0.5 rounded-lg font-semibold border cursor-pointer ${
                   newBillSplitCount === memberCount + 1
-                    ? 'bg-amber-600 text-white border-amber-600'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    ? 'bg-[#D97706] text-white border-[#D97706]'
+                    : 'bg-white text-[#7A6A5C] border-[#DDD3C2] hover:bg-[#FAF7F2]'
                 }`}
               >
-                +1 Meal Guest ({memberCount + 1})
+                +১ গেস্ট ({memberCount + 1})
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Total Actual Bill Amount (৳)
+            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
+              মোট বিলের পরিমাণ (৳)
             </label>
             <input
               type="number"
               step="any"
-              placeholder="e.g. 1000 or 1700"
+              placeholder="যেমন: 1000 অথবা 1700"
               value={newBillAmount}
               onChange={(e) => onAmountChange(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden font-mono"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden font-mono bg-white"
               required
             />
             {newBillAmount && newBillSplitCount > 0 && (
-              <p className="text-[11px] text-slate-500 mt-1">
-                Exact Split ({newBillSplitCount} people):{' '}
-                <strong className="text-slate-800">
+              <p className="text-[11px] text-[#8C7A6B] mt-1 font-mono">
+                সঠিক ভাগ ({newBillSplitCount} জন):{' '}
+                <strong className="text-[#2C241E]">
                   ৳{(parseFloat(newBillAmount) / newBillSplitCount).toFixed(2)}
                 </strong>
               </p>
@@ -218,20 +223,20 @@ export default function BillModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Collected Amount per Person (৳)
+            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
+              মাথাপিছু ধার্য টাকা (৳)
             </label>
             <input
               type="number"
               step="any"
-              placeholder="e.g. 165 or 285"
+              placeholder="যেমন: 165 অথবা 285"
               value={newBillCollected}
               onChange={(e) => setNewBillCollected(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden font-mono text-indigo-700 font-bold"
+              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden font-mono text-[#C25E3E] font-black bg-white"
               required
             />
             {newBillAmount && newBillCollected && newBillSplitCount > 0 && (
-              <div className="mt-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+              <div className="mt-2 p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8DFC8] text-xs">
                 {(() => {
                   const splitPeople = newBillSplitCount;
                   const collPerPerson = parseFloat(newBillCollected) || 0;
@@ -242,27 +247,27 @@ export default function BillModal({
                   const guestCount = splitPeople - memberCount;
 
                   return (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 font-mono">
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-600">
-                          Total to Collect ({splitPeople} people): <strong>৳{totalColl}</strong>
+                        <span className="text-[#7A6A5C] font-sans">
+                          মোট উঠবে ({splitPeople} জন): <strong>৳{totalColl}</strong>
                         </span>
                         <span
-                          className={`font-bold ${
-                            diff >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                          className={`font-black ${
+                            diff >= 0 ? 'text-[#2D5A27]' : 'text-[#B33A3A]'
                           }`}
                         >
                           {diff === 0
-                            ? 'Exact (৳0)'
+                            ? 'সমান (৳০)'
                             : diff > 0
-                            ? `+৳${diff.toFixed(0)} Surplus`
-                            : `-৳${Math.abs(diff).toFixed(0)} Deficit`}
+                            ? `+৳${diff.toFixed(0)} উদ্বৃত্ত`
+                            : `-৳${Math.abs(diff).toFixed(0)} ঘাটতি`}
                         </span>
                       </div>
                       {hasGuests && (
-                        <div className="text-[11px] text-amber-800 font-semibold pt-1 border-t border-slate-200 flex items-center justify-between">
-                          <span>{memberCount} Roommates: ৳{collPerPerson * memberCount}</span>
-                          <span>{guestCount} Meal Guest{guestCount > 1 ? 's' : ''}: ৳{collPerPerson * guestCount}</span>
+                        <div className="text-[11px] text-[#9C6500] font-semibold pt-1 border-t border-[#E8DFC8] flex items-center justify-between font-sans">
+                          <span>{memberCount} রুমমেট: ৳{collPerPerson * memberCount}</span>
+                          <span>{guestCount} মিল গেস্ট: ৳{collPerPerson * guestCount}</span>
                         </div>
                       )}
                     </div>
@@ -272,20 +277,20 @@ export default function BillModal({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E8DFC8]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-[#8C7A6B] hover:bg-[#F3ECE1] rounded-xl transition-colors cursor-pointer"
             >
-              Cancel
+              বাতিল
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2.5 text-xs font-bold bg-[#C25E3E] hover:bg-[#B05133] active:bg-[#9C452B] text-white rounded-xl transition-all shadow-2xs disabled:opacity-50 cursor-pointer"
             >
-              Save Bill
+              বিল সেভ করুন
             </button>
           </div>
         </form>
