@@ -14,6 +14,7 @@ import {
   Receipt,
   Users,
   BookOpen,
+  ShoppingBag,
 } from 'lucide-react';
 import { BillingCycle, BillingCycleSummary, TabType } from './types';
 
@@ -26,6 +27,7 @@ interface HeaderProps {
   netUtilityAdjustment: number;
   memberCount: number;
   importantNotesCount: number;
+  pantryPendingCount?: number;
   onTabChange: (tab: TabType) => void;
   onSelectCycle: (year: number, month: number) => void;
   onOpenMobileDrawer: () => void;
@@ -45,6 +47,7 @@ export default function Header({
   netUtilityAdjustment,
   memberCount,
   importantNotesCount,
+  pantryPendingCount = 0,
   onTabChange,
   onSelectCycle,
   onOpenMobileDrawer,
@@ -261,6 +264,28 @@ export default function Header({
 
         <button
           type="button"
+          onClick={() => onTabChange('pantry')}
+          className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
+            activeTab === 'pantry'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
+          }`}
+        >
+          <ShoppingBag className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
+          <span className="pointer-events-none">Pantry</span>
+          {pantryPendingCount > 0 && (
+            <span
+              className={`px-1 py-0.2 rounded-full text-[9px] font-extrabold shrink-0 pointer-events-none ${
+                activeTab === 'pantry' ? 'bg-indigo-900 text-white' : 'bg-amber-500 text-white'
+              }`}
+            >
+              {pantryPendingCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
           onClick={() => onTabChange('members')}
           className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
             activeTab === 'members'
@@ -341,6 +366,28 @@ export default function Header({
               ? `+৳${netUtilityAdjustment.toFixed(0)} Surplus`
               : `-৳${Math.abs(netUtilityAdjustment).toFixed(0)} Loss`}
           </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onTabChange('pantry')}
+          className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
+            activeTab === 'pantry'
+              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <ShoppingBag className="w-4 h-4 pointer-events-none" />
+          <span className="pointer-events-none">Pantry & Grocery</span>
+          {pantryPendingCount > 0 ? (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold pointer-events-none">
+              {pantryPendingCount} to buy
+            </span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase tracking-wider pointer-events-none">
+              All Stocked
+            </span>
+          )}
         </button>
 
         <button

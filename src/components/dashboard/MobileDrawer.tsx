@@ -7,6 +7,7 @@ import {
   Receipt,
   Users,
   BookOpen,
+  ShoppingBag,
   ShieldCheck,
   Lock,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ interface MobileDrawerProps {
   netUtilityAdjustment: number;
   memberCount: number;
   importantNotesCount: number;
+  pantryPendingCount?: number;
   isAdmin: boolean;
   onOpenMobileCycleModal: () => void;
   onOpenPinModal: () => void;
@@ -39,6 +41,7 @@ export default function MobileDrawer({
   netUtilityAdjustment,
   memberCount,
   importantNotesCount,
+  pantryPendingCount = 0,
   isAdmin,
   onOpenMobileCycleModal,
   onOpenPinModal,
@@ -154,6 +157,38 @@ export default function MobileDrawer({
                 ? `+৳${netUtilityAdjustment.toFixed(0)}`
                 : `-৳${Math.abs(netUtilityAdjustment).toFixed(0)}`}
             </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange('pantry')}
+            className={`w-full flex items-center justify-between p-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer touch-manipulation ${
+              activeTab === 'pantry'
+                ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <ShoppingBag className={`w-4 h-4 ${activeTab === 'pantry' ? 'text-white' : 'text-slate-500'}`} />
+              <span>Pantry & Grocery List</span>
+            </div>
+            {pantryPendingCount > 0 ? (
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'pantry' ? 'bg-indigo-800 text-white' : 'bg-amber-100 text-amber-700'
+                }`}
+              >
+                {pantryPendingCount} to buy
+              </span>
+            ) : (
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'pantry' ? 'bg-indigo-800 text-white' : 'bg-emerald-100 text-emerald-700'
+                }`}
+              >
+                Stocked
+              </span>
+            )}
           </button>
 
           <button

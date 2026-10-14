@@ -4,6 +4,7 @@ import {
   getOrCreateCurrentCycle,
   getAdminStatus,
   getImportantNotes,
+  getPantryItems,
 } from '@/app/actions';
 import Dashboard from '@/components/Dashboard';
 
@@ -18,13 +19,15 @@ export default async function Home({
   const year = params.year ? parseInt(params.year) : undefined;
   const month = params.month ? parseInt(params.month) : undefined;
 
-  const [members, cycles, currentCycle, isAdmin, importantNotes] = await Promise.all([
-    getMembers(),
-    getBillingCycles(),
-    getOrCreateCurrentCycle(year, month),
-    getAdminStatus(),
-    getImportantNotes(),
-  ]);
+  const [members, cycles, currentCycle, isAdmin, importantNotes, pantryItems] =
+    await Promise.all([
+      getMembers(),
+      getBillingCycles(),
+      getOrCreateCurrentCycle(year, month),
+      getAdminStatus(),
+      getImportantNotes(),
+      getPantryItems(),
+    ]);
 
   if (!currentCycle) {
     return (
@@ -41,6 +44,7 @@ export default async function Home({
       currentCycle={currentCycle}
       initialIsAdmin={isAdmin}
       initialImportantNotes={importantNotes}
+      initialPantryItems={pantryItems}
     />
   );
 }

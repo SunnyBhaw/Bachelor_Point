@@ -516,3 +516,118 @@ export async function toggleUtilityBillPayment(
   revalidatePath('/');
   return bill;
 }
+
+// ------------------------------------------------------------------
+// Shared Mess Pantry & Grocery Checklist Actions (Open to all roommates)
+// ------------------------------------------------------------------
+
+export async function getPantryItems() {
+  return prisma.pantryItem.findMany({
+    orderBy: [
+      { isCompleted: 'asc' },
+      { urgency: 'desc' },
+      { createdAt: 'desc' },
+    ],
+  });
+}
+
+export async function addPantryItem(data: {
+  name: string;
+  quantity?: string;
+  category?: string;
+  urgency?: string;
+  addedBy?: string;
+  notes?: string;
+}) {
+  if (!data.name?.trim()) {
+    throw new Error('Item name is required');
+  }
+
+  const item = await prisma.pantryItem.create({
+    data: {
+      name: data.name.trim(),
+      quantity: data.quantity?.trim() || null,
+      category: data.category?.trim() || 'GROCERY',
+      urgency: data.urgency === 'URGENT' ? 'URGENT' : 'NORMAL',
+      addedBy: data.addedBy?.trim() || null,
+      notes: data.notes?.trim() || null,
+      isCompleted: false,
+    },
+  });
+
+  revalidatePath('/');
+  return item;
+}
+
+export async function togglePantryItem(id: string, isCompleted: boolean) {
+  const item = await prisma.pantryItem.update({
+    where: { id },
+    data: {
+      isCompleted,
+      completedAt: isCompleted ? new Date() : null,
+    },
+  });
+
+  revalidatePath('/');
+  return item;
+}
+
+export async function deletePantryItem(id: string) {
+  await prisma.pantryItem.delete({
+    where: { id },
+  });
+
+  revalidatePath('/');
+}
+
+export async function clearCompletedPantryItems() {
+  const result = await prisma.pantryItem.deleteMany({
+    where: { isCompleted: true },
+  });
+
+  revalidatePath('/');
+  return result.count;
+}
+
+export async function syncOfflinePantryActions(
+  actions: Array<{ type: 'TOGGLE' | 'ADD' | 'DELETE' | 'CLEAR_COMPLETED'; payload: any }>
+) {
+  for (const action of actions) {
+    try {
+      if (action.type === 'TOGGLE' && action.payload?.id) {
+        await prisma.pantryItem.update({
+          where: { id: action.payload.id },
+          data: {
+            isCompleted: Boolean(action.payload.isCompleted),
+            completedAt: action.payload.isCompleted ? new Date() : null,
+          },
+        });
+      } else if (action.type === 'ADD' && action.payload?.name) {
+        await prisma.pantryItem.create({
+          data: {
+            name: action.payload.name.trim(),
+            quantity: action.payload.quantity?.trim() || null,
+            category: action.payload.category || 'GROCERY',
+            urgency: action.payload.urgency === 'URGENT' ? 'URGENT' : 'NORMAL',
+            addedBy: action.payload.addedBy?.trim() || null,
+            notes: action.payload.notes?.trim() || null,
+            isCompleted: Boolean(action.payload.isCompleted),
+          },
+        });
+      } else if (action.type === 'DELETE' && action.payload?.id) {
+        await prisma.pantryItem.delete({
+          where: { id: action.payload.id },
+        });
+      } else if (action.type === 'CLEAR_COMPLETED') {
+        await prisma.pantryItem.deleteMany({
+          where: { isCompleted: true },
+        });
+      }
+    } catch (err) {
+      console.warn(`[Sync] Skipped failed offline action (${action.type}):`, err);
+    }
+  }
+
+  revalidatePath('/');
+  return { success: true };
+}

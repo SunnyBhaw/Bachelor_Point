@@ -75,3 +75,17 @@ model ImportantNote {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+model PantryItem {
+  id          String    @id @default(cuid())
+  name        String    // Item name, e.g. "মিনিকেট চাল ২৫ কেজি", "সয়াবিন তেল ৫ লিটার", "পেঁয়াজ ২ কেজি"
+  quantity    String?   // e.g. "5 kg", "1 bottle", "2 packs"
+  category    String    @default("GROCERY") // "GROCERY" (খাবার/বাজার), "ESSENTIAL" (সাবান/পরিষ্কার), "SPICE" (মসলা)
+  isCompleted Boolean   @default(false) // false = to buy, true = bought
+  urgency     String    @default("NORMAL") // "NORMAL", "URGENT" (জরুরী)
+  addedBy     String?   // Roommate name
+  notes       String?   // Notes or brand preference
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

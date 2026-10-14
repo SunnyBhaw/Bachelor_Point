@@ -26,6 +26,7 @@ import {
   BillingCycle,
   BillingCycleSummary,
   ImportantNote,
+  PantryItem,
   TabType,
   MemberBilling,
 } from './dashboard/types';
@@ -35,9 +36,11 @@ import SummaryCards from './dashboard/SummaryCards';
 import MobileDrawer from './dashboard/MobileDrawer';
 import MobileCycleModal from './dashboard/MobileCycleModal';
 import Toast, { ToastMessage } from './dashboard/Toast';
+import PwaRegister from '@/components/PwaRegister';
 
 import DuesTab from './dashboard/tabs/DuesTab';
 import BillsTab from './dashboard/tabs/BillsTab';
+import PantryTab from './dashboard/tabs/PantryTab';
 import MembersTab from './dashboard/tabs/MembersTab';
 import NotesTab from './dashboard/tabs/NotesTab';
 
@@ -48,7 +51,7 @@ import ChangePinModal from './dashboard/modals/ChangePinModal';
 import NoteModal from './dashboard/modals/NoteModal';
 import HouseRentModal from './dashboard/modals/HouseRentModal';
 
-export type { ImportantNote, BillingCycle, Member, MemberBilling };
+export type { ImportantNote, BillingCycle, Member, MemberBilling, PantryItem };
 
 interface DashboardProps {
   initialMembers: Member[];
@@ -56,6 +59,7 @@ interface DashboardProps {
   currentCycle: BillingCycle;
   initialIsAdmin?: boolean;
   initialImportantNotes?: ImportantNote[];
+  initialPantryItems?: PantryItem[];
 }
 
 export default function Dashboard({
@@ -64,6 +68,7 @@ export default function Dashboard({
   currentCycle: initialCycle,
   initialIsAdmin = false,
   initialImportantNotes = [],
+  initialPantryItems = [],
 }: DashboardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -73,6 +78,7 @@ export default function Dashboard({
   const [currentCycle, setCurrentCycle] = useState<BillingCycle>(initialCycle);
   const [members, setMembers] = useState<Member[]>(initialMembers);
   const [importantNotes, setImportantNotes] = useState<ImportantNote[]>(initialImportantNotes);
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>(initialPantryItems);
   const [activeTab, setActiveTab] = useState<TabType>('dues');
 
   // Synchronize local state when server props update (e.g., month navigation or router.refresh)
@@ -87,6 +93,10 @@ export default function Dashboard({
   useEffect(() => {
     setImportantNotes(initialImportantNotes);
   }, [initialImportantNotes]);
+
+  useEffect(() => {
+    setPantryItems(initialPantryItems);
+  }, [initialPantryItems]);
 
   useEffect(() => {
     setIsAdmin(initialIsAdmin);
@@ -192,6 +202,7 @@ export default function Dashboard({
   const totalExpectedAmount = totalRoomRent + totalRoommatesUtility;
   const totalPaidAmount = currentCycle.memberBillings.reduce((acc, mb) => acc + mb.paidAmount, 0);
   const totalDuesPending = totalExpectedAmount - totalPaidAmount;
+  const pantryPendingCount = pantryItems.filter((i) => !i.isCompleted).length;
 
   const totalMessExpenses = totalRoomRent + totalBillsAmount;
   const paidBillsAmount = currentCycle.bills
@@ -667,6 +678,9 @@ export default function Dashboard({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-12 sm:pb-16">
+      {/* PWA Service Worker & Online/Offline Status Indicator */}
+      <PwaRegister />
+
       {/* Top Header & Navigation */}
       <Header
         currentCycle={currentCycle}
@@ -677,6 +691,7 @@ export default function Dashboard({
         netUtilityAdjustment={netUtilityAdjustment}
         memberCount={memberCount}
         importantNotesCount={importantNotes.length}
+        pantryPendingCount={pantryPendingCount}
         onTabChange={handleTabSwitch}
         onSelectCycle={handleSelectCycle}
         onOpenMobileDrawer={() => setMobileDrawerOpen(true)}
@@ -736,7 +751,16 @@ export default function Dashboard({
           />
         )}
 
-        {/* Tab 3: Roommates Directory */}
+        {/* Tab 3: Shared Mess Pantry & Grocery Checklist (Option 5) */}
+        {activeTab === 'pantry' && (
+          <PantryTab
+            initialPantryItems={pantryItems}
+            members={members}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Tab 4: Roommates Directory */}
         {activeTab === 'members' && (
           <MembersTab
             members={members}
@@ -753,7 +777,7 @@ export default function Dashboard({
           />
         )}
 
-        {/* Tab 4: Important Contacts & Notes */}
+        {/* Tab 5: Important Contacts & Notes */}
         {activeTab === 'notes' && (
           <NotesTab
             importantNotes={importantNotes}
@@ -777,6 +801,7 @@ export default function Dashboard({
         netUtilityAdjustment={netUtilityAdjustment}
         memberCount={memberCount}
         importantNotesCount={importantNotes.length}
+        pantryPendingCount={pantryPendingCount}
         isAdmin={isAdmin}
         onOpenMobileCycleModal={() => {
           setMobileDrawerOpen(false);

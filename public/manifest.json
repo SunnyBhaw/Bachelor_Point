@@ -1,0 +1,24 @@
+{
+  "name": "Bachelor Point - Smart Mess Manager",
+  "short_name": "Bachelor Point",
+  "description": "Manage bachelor mess rent, utility splits, and shared grocery pantry seamlessly offline & online.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
