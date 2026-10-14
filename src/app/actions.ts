@@ -3,8 +3,13 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import crypto from 'crypto';
 
 const DEFAULT_PIN = '1234';
+
+function hashPin(pin: string): string {
+  return crypto.createHash('sha256').update(pin.trim()).digest('hex');
+}
 
 // Check if current user is admin
 export async function getAdminStatus(): Promise<boolean> {
@@ -18,9 +23,26 @@ export async function verifyAdminPin(pin: string) {
   const pinSetting = await prisma.setting.findUnique({
     where: { key: 'admin_pin' },
   });
-  const actualPin = pinSetting?.value || DEFAULT_PIN;
+  const storedVal = pinSetting?.value || DEFAULT_PIN;
+  const inputTrimmed = pin.trim();
+  const inputHash = hashPin(inputTrimmed);
 
-  if (pin.trim() === actualPin) {
+  // Check if matches either the cryptographic hash OR legacy plaintext
+  const isMatch =
+    storedVal === inputHash ||
+    storedVal === inputTrimmed ||
+    (storedVal === DEFAULT_PIN && inputTrimmed === DEFAULT_PIN);
+
+  if (isMatch) {
+    // Automatically migrate stored plaintext PIN to hash
+    if (storedVal !== inputHash) {
+      await prisma.setting.upsert({
+        where: { key: 'admin_pin' },
+        update: { value: inputHash },
+        create: { key: 'admin_pin', value: inputHash },
+      });
+    }
+
     const cookieStore = await cookies();
     cookieStore.set('bp_admin_session', 'authenticated', {
       httpOnly: true,
@@ -49,9 +71,16 @@ export async function changeAdminPin(currentPin: string, newPin: string) {
   const pinSetting = await prisma.setting.findUnique({
     where: { key: 'admin_pin' },
   });
-  const actualPin = pinSetting?.value || DEFAULT_PIN;
+  const storedVal = pinSetting?.value || DEFAULT_PIN;
+  const currentTrimmed = currentPin.trim();
+  const currentHash = hashPin(currentTrimmed);
 
-  if (currentPin.trim() !== actualPin) {
+  const isMatch =
+    storedVal === currentHash ||
+    storedVal === currentTrimmed ||
+    (storedVal === DEFAULT_PIN && currentTrimmed === DEFAULT_PIN);
+
+  if (!isMatch) {
     return { success: false, error: 'Current PIN is incorrect.' };
   }
 
@@ -59,10 +88,11 @@ export async function changeAdminPin(currentPin: string, newPin: string) {
     return { success: false, error: 'New PIN must be at least 4 digits.' };
   }
 
+  const newHash = hashPin(newPin.trim());
   await prisma.setting.upsert({
     where: { key: 'admin_pin' },
-    update: { value: newPin.trim() },
-    create: { key: 'admin_pin', value: newPin.trim() },
+    update: { value: newHash },
+    create: { key: 'admin_pin', value: newHash },
   });
 
   return { success: true };
@@ -100,23 +130,17 @@ export async function addMember(name: string, phone: string) {
     },
   });
 
-  // Also auto-add this member to any open billing cycle
-  const openCycles = await prisma.billingCycle.findMany();
-  for (const cycle of openCycles) {
-    await prisma.memberBilling.upsert({
-      where: {
-        billingCycleId_memberId: {
-          billingCycleId: cycle.id,
-          memberId: member.id,
-        },
-      },
-      update: {},
-      create: {
+  // Also auto-add this member to all existing billing cycles in one batch
+  const cycles = await prisma.billingCycle.findMany({ select: { id: true } });
+  if (cycles.length > 0) {
+    await prisma.memberBilling.createMany({
+      data: cycles.map((cycle) => ({
         billingCycleId: cycle.id,
         memberId: member.id,
         roomRent: 0,
         paidAmount: 0,
-      },
+      })),
+      skipDuplicates: true,
     });
   }
 
@@ -179,20 +203,21 @@ export async function getOrCreateCurrentCycle(year?: number, month?: number) {
     });
   }
 
-  // Ensure all current members have a MemberBilling record for this cycle
+  // Ensure all current members have a MemberBilling record for this cycle in a single batch
   const members = await prisma.member.findMany();
-  for (const member of members) {
-    const existing = cycle.memberBillings.find((b) => b.memberId === member.id);
-    if (!existing) {
-      await prisma.memberBilling.create({
-        data: {
-          billingCycleId: cycle.id,
-          memberId: member.id,
-          roomRent: 0,
-          paidAmount: 0,
-        },
-      });
-    }
+  const existingMemberIds = new Set(cycle.memberBillings.map((b) => b.memberId));
+  const missingMembers = members.filter((m) => !existingMemberIds.has(m.id));
+
+  if (missingMembers.length > 0) {
+    await prisma.memberBilling.createMany({
+      data: missingMembers.map((m) => ({
+        billingCycleId: cycle.id,
+        memberId: m.id,
+        roomRent: 0,
+        paidAmount: 0,
+      })),
+      skipDuplicates: true,
+    });
   }
 
   // Fetch updated cycle
@@ -227,6 +252,21 @@ export async function createBillingCycle(year: number, month: number) {
     return existing;
   }
 
+  // Find previous billing cycle to carry over room rents and fixed utility bills
+  const previousCycle = await prisma.billingCycle.findFirst({
+    where: {
+      OR: [
+        { year: { lt: year } },
+        { year: year, month: { lt: month } },
+      ],
+    },
+    orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    include: {
+      memberBillings: true,
+      bills: true,
+    },
+  });
+
   const cycle = await prisma.billingCycle.create({
     data: {
       year,
@@ -235,17 +275,41 @@ export async function createBillingCycle(year: number, month: number) {
     },
   });
 
-  // Initialize all members into this cycle
+  // Initialize all members into this cycle carrying over their room rents
   const members = await prisma.member.findMany();
-  for (const m of members) {
-    await prisma.memberBilling.create({
-      data: {
+  if (members.length > 0) {
+    const memberBillingsData = members.map((m) => {
+      const prevBilling = previousCycle?.memberBillings.find((pb) => pb.memberId === m.id);
+      return {
         billingCycleId: cycle.id,
         memberId: m.id,
-        roomRent: 0,
+        roomRent: prevBilling ? prevBilling.roomRent : 0,
         paidAmount: 0,
-      },
+      };
     });
+
+    await prisma.memberBilling.createMany({
+      data: memberBillingsData,
+      skipDuplicates: true,
+    });
+  }
+
+  // Automatically carry over recurring FIXED bills (WiFi, Maid, Dust, etc.) from previous cycle
+  if (previousCycle && previousCycle.bills.length > 0) {
+    const fixedBills = previousCycle.bills.filter((b) => b.billType === 'FIXED');
+    if (fixedBills.length > 0) {
+      await prisma.utilityBill.createMany({
+        data: fixedBills.map((b) => ({
+          billingCycleId: cycle.id,
+          name: b.name,
+          billType: b.billType,
+          totalAmount: b.totalAmount,
+          collectedPerPerson: b.collectedPerPerson,
+          splitCount: b.splitCount ?? 0,
+          isPaid: false,
+        })),
+      });
+    }
   }
 
   revalidatePath('/');
@@ -325,6 +389,25 @@ export async function updateMemberBilling(
     data: {
       roomRent: data.roomRent,
       paidAmount: data.paidAmount,
+    },
+  });
+
+  revalidatePath('/');
+  return billing;
+}
+
+export async function quickSetMemberPayment(
+  memberBillingId: string,
+  paidAmount: number
+) {
+  await requireAdmin();
+  const billing = await prisma.memberBilling.update({
+    where: { id: memberBillingId },
+    data: {
+      paidAmount: Math.max(0, paidAmount),
+    },
+    include: {
+      member: true,
     },
   });
 
