@@ -52,50 +52,45 @@ export default function BillsTab({
   onToggleUtilityBill,
   onDeleteBill,
 }: BillsTabProps) {
-  const payoutPercent =
-    totalMessExpenses > 0
-      ? Math.min(100, Math.round((totalPaidOutExpenses / totalMessExpenses) * 100))
-      : 0;
-
   return (
     <div className="space-y-6">
       {/* Mess Outgoing Payouts Tracker (House Rent + Utilities) */}
-      <div className="bg-white rounded-2xl border border-[#E8DFC8] p-4 sm:p-5 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[#F2ECE1]">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-base sm:text-lg font-extrabold text-[#2C241E]">
-                Mess Outgoing Payouts Tracker (মেস খরচ ও পরিশোধ)
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                Mess Outgoing Payouts Tracker
               </h3>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#E2EBDD] text-[#2D5A27] border border-[#CFDEC8]">
-                সবার জন্য উন্মুক্ত
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Open to All Roommates
               </span>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#F3ECE1] text-[#7A6A5C]">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                 {currentCycle.name}
               </span>
             </div>
-            <p className="text-xs text-[#8C7A6B] mt-0.5">
-              বাড়িওয়ালার বাসা ভাড়া এবং ওয়াইফাই, বুয়া, কারেন্ট ও গ্যাস বিল পরিশোধের হিসাব।
+            <p className="text-xs text-slate-500 mt-0.5">
+              Track when you gave House Rent to the Landlord and paid utility vendors.
             </p>
           </div>
 
           {/* Overall Payout Status Summary */}
-          <div className="flex items-center gap-2 bg-[#FAF7F2] px-3.5 py-2 rounded-xl border border-[#E8DFC8] shrink-0 font-mono">
-            <span className="text-xs font-semibold text-[#8C7A6B] font-sans">পরিশোধ:</span>
-            <span className="text-xs font-black text-[#2D5A27]">
+          <div className="flex items-center gap-2 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
+            <span className="text-xs font-semibold text-slate-500">Paid Out:</span>
+            <span className="text-xs font-extrabold text-emerald-600">
               ৳{Math.round(totalPaidOutExpenses)}
             </span>
-            <span className="text-[#DDD3C2]">/</span>
-            <span className="text-xs font-bold text-[#2C241E]">
+            <span className="text-slate-300">/</span>
+            <span className="text-xs font-bold text-slate-700">
               ৳{Math.round(totalMessExpenses)}
             </span>
             {totalRemainingExpensesToPay > 0 ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#FDF2EC] text-[#B33A3A] border border-[#F7D5C9] font-bold ml-1 font-sans">
-                ৳{Math.round(totalRemainingExpensesToPay)} বাকি
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold ml-1">
+                ৳{Math.round(totalRemainingExpensesToPay)} Due
               </span>
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#E2EBDD] text-[#2D5A27] border border-[#CFDEC8] font-bold ml-1 font-sans">
-                সব পরিশোধিত ✓
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold ml-1">
+                All Cleared ✓
               </span>
             )}
           </div>
@@ -103,66 +98,76 @@ export default function BillsTab({
 
         {/* Progress bar */}
         <div>
-          <div className="w-full bg-[#EFE9DF] rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
             <div
-              className="bg-[#2D5A27] h-2 rounded-full transition-all duration-300"
-              style={{ width: `${payoutPercent}%` }}
+              className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+              style={{
+                width: `${
+                  totalMessExpenses > 0
+                    ? Math.min(100, Math.round((totalPaidOutExpenses / totalMessExpenses) * 100))
+                    : 0
+                }%`,
+              }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] text-[#8C7A6B] mt-1.5 font-medium">
-            <span>{payoutPercent}% মেস খরচ পরিশোধ সম্পন্ন</span>
+          <div className="flex items-center justify-between text-[11px] text-slate-500 mt-1">
             <span>
-              {currentCycle.houseRentPaid ? '১/১ বাড়ি ভাড়া' : '০/১ বাড়ি ভাড়া'} •{' '}
-              {totalPaidBillsCount}/{currentCycle.bills.length} ইউটিলিটি পরিশোধিত
+              {totalMessExpenses > 0
+                ? Math.round((totalPaidOutExpenses / totalMessExpenses) * 100)
+                : 0}
+              % of total payouts completed
+            </span>
+            <span>
+              {currentCycle.houseRentPaid ? '1/1 Rent' : '0/1 Rent'} • {totalPaidBillsCount}/
+              {currentCycle.bills.length} Bills Paid
             </span>
           </div>
         </div>
 
-        {/* House Rent Card (Prominent Warm Banner) */}
+        {/* House Rent Card (Prominent) */}
         <div
-          className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+          className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
             currentCycle.houseRentPaid
-              ? 'bg-[#E2EBDD]/50 border-[#CFDEC8]'
-              : 'bg-[#FDF2EC]/70 border-[#F7D5C9]'
+              ? 'bg-emerald-50/60 border-emerald-200'
+              : 'bg-rose-50/40 border-rose-200'
           }`}
         >
           <div className="flex items-start gap-3">
             <div
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-bold shadow-2xs ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold ${
                 currentCycle.houseRentPaid
-                  ? 'bg-[#E2EBDD] text-[#2D5A27] border border-[#CFDEC8]'
-                  : 'bg-[#FDF2EC] text-[#C25E3E] border border-[#F7D5C9]'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-rose-100 text-rose-700'
               }`}
             >
               <Home className="w-5 h-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h4 className="font-bold text-[#2C241E] text-sm sm:text-base">
-                  House Rent to Landlord (বাড়িওয়ালার বাসা ভাড়া)
+                <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+                  House Rent to Landlord (বাড়িওয়ালার ভাড়া)
                 </h4>
                 {currentCycle.houseRentPaid ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-[#E2EBDD] text-[#2D5A27] rounded-full font-bold border border-[#CFDEC8]">
-                    <CheckCircle2 className="w-3 h-3 text-[#2D5A27]" /> বাড়িওয়ালাকে পরিশোধিত ✓
+                  <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold border border-emerald-300">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Paid to Landlord ✓
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-[#FDF2EC] text-[#B33A3A] rounded-full font-bold border border-[#F7D5C9]">
-                    <AlertCircle className="w-3 h-3 text-[#B33A3A]" /> বাড়িওয়ালার ভাড়া বাকি ⏳
+                  <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-rose-100 text-rose-800 rounded-full font-bold border border-rose-300">
+                    <AlertCircle className="w-3 h-3 text-rose-600" /> Due to Landlord ⏳
                   </span>
                 )}
               </div>
-              <div className="text-xs text-[#7A6A5C] mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              <div className="text-xs text-slate-600 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span>
-                  মোট অ্যাপার্টমেন্ট ভাড়া:{' '}
-                  <strong className="text-[#2C241E] font-mono">৳{Math.round(totalRoomRent)}</strong>
+                  Total Apartment Rent: <strong className="text-slate-900">৳{Math.round(totalRoomRent)}</strong>
                 </span>
                 {currentCycle.houseRentPaid && currentCycle.houseRentPaidAt && (
-                  <span className="text-[#2D5A27] font-semibold">
-                    • পরিশোধের তারিখ: {new Date(currentCycle.houseRentPaidAt).toLocaleDateString()}
+                  <span className="text-emerald-700 font-medium">
+                    • Paid on {new Date(currentCycle.houseRentPaidAt).toLocaleDateString()}
                   </span>
                 )}
                 {currentCycle.houseRentPaidNote && (
-                  <span className="text-[#8C7A6B] italic">
+                  <span className="text-slate-500 italic">
                     ({currentCycle.houseRentPaidNote})
                   </span>
                 )}
@@ -176,18 +181,18 @@ export default function BillsTab({
               <button
                 type="button"
                 onClick={onMarkHouseRentUnpaid}
-                className="px-3 py-1.5 text-xs font-bold text-[#8C7A6B] hover:text-[#B33A3A] hover:bg-white bg-white/80 border border-[#DDD3C2] rounded-xl transition-all cursor-pointer touch-manipulation"
+                className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-white bg-white/80 border border-slate-200 rounded-xl transition-all cursor-pointer touch-manipulation"
               >
-                বাকি চিহ্নিত করুন
+                Mark as Unpaid
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onOpenHouseRentModal}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2D5A27] hover:bg-[#23491E] text-white rounded-xl text-xs font-bold shadow-2xs transition-all cursor-pointer touch-manipulation"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer touch-manipulation"
               >
                 <Check className="w-4 h-4" />
-                বাড়ি ভাড়া পরিশোধ মার্ক
+                Mark House Rent as Paid
               </button>
             )}
           </div>
@@ -197,9 +202,9 @@ export default function BillsTab({
       {/* Utility Bills List Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-extrabold text-[#2C241E]">Utility Bills (মেস বিলসমূহ)</h3>
-          <p className="text-xs text-[#8C7A6B]">
-            ওয়াইফাই, বুয়া, কারেন্ট, গ্যাস ও ময়লা বিল ব্যবস্থাপনা ও স্প্লিট
+          <h3 className="text-lg font-bold text-slate-900">Utility Bills</h3>
+          <p className="text-xs text-slate-500">
+            Manage monthly utilities and custom split counts (e.g. meal guests on Gas)
           </p>
         </div>
 
@@ -212,38 +217,38 @@ export default function BillsTab({
               onOpenAddBillModal();
             }
           }}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#C25E3E] hover:bg-[#B05133] active:bg-[#9C452B] text-white rounded-xl text-sm font-bold shadow-2xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm transition-colors cursor-pointer"
         >
           {isAdmin ? <Plus className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-          বিল যুক্ত করুন
+          Add Bill
         </button>
       </div>
 
-      {/* Meal Guest Summary Alert if extra people share any bill */}
+      {/* Meal Guest Summary Alert if extra people share any bill (like Gas) */}
       {totalGuestContributions > 0 && (
-        <div className="bg-[#FDF0D5] border border-[#F2D79E] rounded-2xl p-3.5 flex items-center justify-between gap-3 text-xs text-[#9C6500] shadow-2xs">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
           <div className="flex items-center gap-2.5">
             <span className="text-lg">🍲</span>
             <div>
-              <span className="font-bold">মিল গেস্ট যুক্ত আছেন: </span>
-              <span className="text-[#7A4E2D]">
-                খাবারের বিলে অতিথি(দের) থেকে <strong>৳{Math.round(totalGuestContributions)}</strong> গ্রহণ করুন।
+              <span className="font-bold">Meal Guests Active: </span>
+              <span className="text-amber-800">
+                Collect <strong>৳{Math.round(totalGuestContributions)}</strong> total from guest(s) sharing meal bills.
               </span>
             </div>
           </div>
-          <span className="px-2.5 py-1 bg-white border border-[#F2D79E] rounded-lg font-extrabold text-[#9C6500] shrink-0 font-mono">
-            ৳{Math.round(totalGuestContributions)} Guest
+          <span className="px-2.5 py-1 bg-amber-100 rounded-lg font-extrabold text-amber-900 shrink-0">
+            ৳{Math.round(totalGuestContributions)} Guest Share
           </span>
         </div>
       )}
 
       {/* Utility Bills Grid */}
       {currentCycle.bills.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-dashed border-[#DDD3C2] p-10 text-center">
-          <Receipt className="w-12 h-12 text-[#8C7A6B] mx-auto mb-3" />
-          <h4 className="font-bold text-[#2C241E] text-base">এই মাসে কোনো বিল যুক্ত করা হয়নি</h4>
-          <p className="text-sm text-[#8C7A6B] mt-1 mb-4">
-            ওয়াইফাই, গ্যাস, বুয়ার বেতন বা কারেন্ট বিল যুক্ত করে শেয়ারিং শুরু করুন।
+        <div className="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
+          <Receipt className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+          <h4 className="font-bold text-slate-800 text-base">No bills added yet for this month</h4>
+          <p className="text-sm text-slate-500 mt-1 mb-4">
+            Add bills like WiFi, Gas, Maid salary, or Electricity to start splitting.
           </p>
           <button
             type="button"
@@ -254,9 +259,9 @@ export default function BillsTab({
                 onOpenAddBillModal();
               }
             }}
-            className="px-4 py-2 bg-[#C25E3E] text-white rounded-xl text-sm font-bold hover:bg-[#B05133] cursor-pointer"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 cursor-pointer"
           >
-            প্রথম বিল যুক্ত করুন
+            Add First Bill
           </button>
         </div>
       ) : (
@@ -275,49 +280,48 @@ export default function BillsTab({
             return (
               <div
                 key={bill.id}
-                className="bg-white rounded-2xl border border-[#E8DFC8] p-4 sm:p-5 shadow-2xs flex flex-col gap-3.5"
+                className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col gap-3.5"
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   {/* Left: Bill details */}
                   <div className="min-w-[200px]">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-bold text-[#2C241E] text-base">{bill.name}</h4>
+                      <h4 className="font-bold text-slate-900 text-base">{bill.name}</h4>
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                           bill.billType === 'FIXED'
-                            ? 'bg-[#F5E5DC] text-[#C25E3E] border border-[#E8C2B3]'
-                            : 'bg-[#FDF0D5] text-[#9C6500] border border-[#F2D79E]'
+                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
                         }`}
                       >
-                        {bill.billType === 'FIXED' ? 'ফিক্সড বিল' : 'ভেরিয়েবল'}
+                        {bill.billType}
                       </span>
                       {hasGuests && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[#FDF0D5] text-[#9C6500] border border-[#F2D79E]">
-                          +{guestCount} মিল গেস্ট
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                          +{guestCount} Meal Guest{guestCount > 1 ? 's' : ''}
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-[#7A6A5C] mt-1 font-mono">
-                      মোট বিল: <strong className="text-[#2C241E]">৳{bill.totalAmount}</strong> | সঠিক ভাগ ({effectiveSplitPeople}জন):{' '}
-                      <span className="font-bold text-[#C25E3E]">৳{exactSplit.toFixed(2)}</span>
+                    <div className="text-xs text-slate-500 mt-1">
+                      Total Bill: <strong className="text-slate-800">৳{bill.totalAmount}</strong> | Exact split ({effectiveSplitPeople}p):{' '}
+                      <span className="font-mono">৳{exactSplit.toFixed(2)}</span>
                     </div>
                     {hasGuests && (
-                      <div className="text-[11px] text-[#7A4E2D] font-semibold mt-1 flex items-center gap-1.5">
+                      <div className="text-[11px] text-amber-800 font-semibold mt-1.5 flex items-center gap-1.5">
                         <span>🍲</span>
                         <span>
-                          {memberCount} রুমমেট + {guestCount} গেস্ট • গেস্ট দিবে:{' '}
-                          <strong className="font-mono">৳{bill.collectedPerPerson * guestCount}</strong>
+                          {memberCount} Roommates + {guestCount} Guest{guestCount > 1 ? 's' : ''} • Guest pays: <strong>৳{bill.collectedPerPerson * guestCount}</strong>
                         </span>
                       </div>
                     )}
                   </div>
 
                   {/* Middle: Split Count & Collected Amount Tuning */}
-                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     {/* Split People Stepper */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
-                        ভাগ হবে (সদস্য)
+                      <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                        Split Among
                       </label>
                       {isAdmin ? (
                         <div className="flex items-center gap-1">
@@ -329,48 +333,48 @@ export default function BillsTab({
                                 Math.max(1, effectiveSplitPeople - 1)
                               )
                             }
-                            title="সদস্য কমান"
-                            className="w-7 h-7 rounded-lg bg-[#F3ECE1] hover:bg-[#EAE1D3] text-[#2C241E] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                            title="Decrease people count"
+                            className="w-7 h-7 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
                           >
                             -
                           </button>
                           <div
-                            className={`px-2.5 py-1 text-xs font-bold rounded-lg border text-center min-w-[56px] font-mono ${
+                            className={`px-2.5 py-1 text-xs font-bold rounded-md border text-center min-w-[56px] ${
                               hasGuests
-                                ? 'bg-[#FDF0D5] text-[#9C6500] border-[#F2D79E] font-black'
-                                : 'bg-[#FAF7F2] text-[#2C241E] border-[#E8DFC8]'
+                                ? 'bg-amber-50 text-amber-900 border-amber-200 font-extrabold'
+                                : 'bg-slate-50 text-slate-800 border-slate-200'
                             }`}
                           >
-                            {effectiveSplitPeople} জন
+                            {effectiveSplitPeople} pers
                           </div>
                           <button
                             type="button"
                             onClick={() =>
                               onUpdateBillSplitCount(bill.id, effectiveSplitPeople + 1)
                             }
-                            title="সদস্য বা মিল গেস্ট বাড়ান"
-                            className="w-7 h-7 rounded-lg bg-[#F3ECE1] hover:bg-[#EAE1D3] text-[#2C241E] font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+                            title="Increase people count (add meal guest)"
+                            className="w-7 h-7 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
                           >
                             +
                           </button>
                         </div>
                       ) : (
                         <div
-                          className={`px-2.5 py-1 text-xs font-bold rounded-lg border text-center font-mono ${
+                          className={`px-2.5 py-1 text-xs font-bold rounded-md border text-center ${
                             hasGuests
-                              ? 'bg-[#FDF0D5] text-[#9C6500] border-[#F2D79E] font-black'
-                              : 'bg-[#FAF7F2] text-[#2C241E] border-[#E8DFC8]'
+                              ? 'bg-amber-50 text-amber-900 border-amber-200 font-extrabold'
+                              : 'bg-slate-50 text-slate-800 border-slate-200'
                           }`}
                         >
-                          {effectiveSplitPeople} জন
+                          {effectiveSplitPeople} Persons
                         </div>
                       )}
                     </div>
 
                     {/* Collected / Person */}
                     <div>
-                      <label className="block text-[11px] font-semibold text-[#8C7A6B] mb-1">
-                        মাথাপিছু ধার্য (৳)
+                      <label className="block text-[11px] font-semibold text-slate-500 mb-1">
+                        Collected / Person (৳)
                       </label>
                       {isAdmin ? (
                         <div className="flex items-center gap-1.5">
@@ -383,7 +387,7 @@ export default function BillsTab({
                                 parseFloat(e.target.value) || 0
                               )
                             }
-                            className="w-20 px-2 py-1 text-sm font-extrabold text-[#C25E3E] bg-[#FAF7F2] border border-[#DDD3C2] rounded-xl focus:border-[#C25E3E] outline-hidden text-center font-mono"
+                            className="w-20 px-2 py-1 text-sm font-bold text-indigo-600 bg-slate-50 border border-slate-200 rounded-lg focus:border-indigo-500 outline-hidden text-center"
                           />
                           <div className="flex items-center gap-1">
                             <button
@@ -394,8 +398,8 @@ export default function BillsTab({
                                   bill.collectedPerPerson - 5
                                 )
                               }
-                              title="৫ টাকা কমান"
-                              className="px-1.5 py-1 text-xs font-bold bg-[#F3ECE1] hover:bg-[#EAE1D3] text-[#2C241E] rounded-md cursor-pointer font-mono"
+                              title="Decrease by 5"
+                              className="px-1.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md cursor-pointer"
                             >
                               -5
                             </button>
@@ -407,39 +411,39 @@ export default function BillsTab({
                                   bill.collectedPerPerson + 5
                                 )
                               }
-                              title="৫ টাকা বাড়ান"
-                              className="px-1.5 py-1 text-xs font-bold bg-[#F3ECE1] hover:bg-[#EAE1D3] text-[#2C241E] rounded-md cursor-pointer font-mono"
+                              title="Increase by 5"
+                              className="px-1.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md cursor-pointer"
                             >
                               +5
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <div className="px-3 py-1.5 text-sm font-extrabold text-[#C25E3E] bg-[#FAF7F2] border border-[#E8DFC8] rounded-xl text-center font-mono">
+                        <div className="px-3 py-1.5 text-sm font-bold text-indigo-700 bg-slate-50 border border-slate-200 rounded-lg text-center font-mono">
                           ৳{bill.collectedPerPerson}
                         </div>
                       )}
                     </div>
 
                     {/* Bill Net Variance */}
-                    <div className="bg-[#FAF7F2] px-3 py-2 rounded-xl border border-[#E8DFC8] text-center min-w-[110px]">
-                      <span className="text-[10px] uppercase font-bold text-[#8C7A6B] block">
-                        ব্যালান্স লাভ/ঘাটতি
+                    <div className="bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 text-center min-w-[110px]">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                        Adjustment
                       </span>
                       <span
-                        className={`text-xs font-extrabold font-mono ${
+                        className={`text-xs font-extrabold ${
                           diff === 0
-                            ? 'text-[#7A6A5C]'
+                            ? 'text-slate-600'
                             : diff > 0
-                            ? 'text-[#2D5A27]'
-                            : 'text-[#B33A3A]'
+                            ? 'text-emerald-600'
+                            : 'text-rose-600'
                         }`}
                       >
                         {diff === 0
-                          ? 'সমান (৳০)'
+                          ? 'Exact (0)'
                           : diff > 0
-                          ? `+৳${diff.toFixed(0)} উদ্বৃত্ত`
-                          : `-৳${Math.abs(diff).toFixed(0)} ঘাটতি`}
+                          ? `+৳${diff.toFixed(0)} Gain`
+                          : `-৳${Math.abs(diff).toFixed(0)} Loss`}
                       </span>
                     </div>
                   </div>
@@ -450,8 +454,8 @@ export default function BillsTab({
                       <button
                         type="button"
                         onClick={() => onDeleteBill(bill.id, bill.name)}
-                        className="p-2 text-[#8C7A6B] hover:text-[#B33A3A] hover:bg-[#FDF2EC] rounded-xl transition-colors cursor-pointer"
-                        title="বিল মুছুন"
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        title="Delete bill"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -460,25 +464,25 @@ export default function BillsTab({
                 </div>
 
                 {/* Provider Payout Status & Quick Toggle */}
-                <div className="flex items-center justify-between border-t border-[#F2ECE1] pt-3">
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-[#8C7A6B] font-semibold">
-                      ভেন্ডর পরিশোধ:
+                    <span className="text-[11px] text-slate-500 font-semibold">
+                      Provider Payout:
                     </span>
                     {bill.isPaid ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-[#E2EBDD] text-[#2D5A27] rounded-full font-bold border border-[#CFDEC8]">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#2D5A27]" />
-                        ভেন্ডরকে পরিশোধিত ✓
+                      <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-emerald-50 text-emerald-800 rounded-full font-bold border border-emerald-200">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        Paid to Provider ✓
                         {bill.paidAt && (
-                          <span className="font-normal text-[10px] text-[#2D5A27] hidden sm:inline">
+                          <span className="font-normal text-[10px] text-emerald-700 hidden sm:inline">
                             ({new Date(bill.paidAt).toLocaleDateString()})
                           </span>
                         )}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-[#FDF0D5] text-[#9C6500] rounded-full font-bold border border-[#F2D79E]">
-                        <AlertCircle className="w-3.5 h-3.5 text-[#9C6500]" />
-                        বিল পরিশোধ বাকি ⏳
+                      <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 bg-amber-50 text-amber-800 rounded-full font-bold border border-amber-200">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                        Payment Pending ⏳
                       </span>
                     )}
                   </div>
@@ -488,18 +492,18 @@ export default function BillsTab({
                     <button
                       type="button"
                       onClick={() => onToggleUtilityBill(bill.id, false)}
-                      className="px-2.5 py-1 text-xs font-bold text-[#8C7A6B] hover:text-[#9C6500] hover:bg-[#F3ECE1] rounded-lg transition-colors cursor-pointer touch-manipulation"
+                      className="px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-amber-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer touch-manipulation"
                     >
-                      বাকি মার্ক করুন
+                      Mark Pending
                     </button>
                   ) : (
                     <button
                       type="button"
                       onClick={() => onToggleUtilityBill(bill.id, true)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2D5A27] hover:bg-[#23491E] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer touch-manipulation"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-xs cursor-pointer touch-manipulation"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      পরিশোধ মার্ক করুন
+                      Mark as Paid
                     </button>
                   )}
                 </div>

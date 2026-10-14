@@ -32,20 +32,16 @@ export default function MobileCycleModal({
       />
 
       {/* Bottom Sheet */}
-      <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 z-10 max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-200 border-t sm:border border-[#E8DFC8]">
-        <div className="flex items-center justify-between pb-3 border-b border-[#E8DFC8]">
+      <div className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl p-5 z-10 max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-200">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#F5E5DC] text-[#C25E3E] flex items-center justify-center">
-              <Calendar className="w-4 h-4" />
-            </div>
-            <h3 className="font-extrabold text-[#2C241E] text-base">
-              Select Billing Cycle (মাস নির্বাচন)
-            </h3>
+            <Calendar className="w-5 h-5 text-indigo-600" />
+            <h3 className="font-bold text-slate-900 text-base">Select Billing Cycle</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-[#8C7A6B] hover:text-[#2C241E] rounded-lg cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -62,37 +58,37 @@ export default function MobileCycleModal({
                   onClose();
                   onSelectCycle(c.year, c.month);
                 }}
-                className={`w-full flex items-center justify-between p-3.5 rounded-2xl text-sm font-semibold transition-colors cursor-pointer ${
+                className={`w-full flex items-center justify-between p-3.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-[#F5E5DC] text-[#C25E3E] font-bold border border-[#E8C2B3]'
-                    : 'text-[#4A3E35] hover:bg-[#F3ECE1] active:bg-[#EAE1D3] border border-transparent'
+                    ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-200'
+                    : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100 border border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-2.5 h-2.5 rounded-full ${
-                      isSelected ? 'bg-[#C25E3E]' : 'bg-[#DDD3C2]'
+                      isSelected ? 'bg-indigo-600' : 'bg-slate-300'
                     }`}
                   />
                   <span>{c.name}</span>
                 </div>
-                {isSelected && <Check className="w-5 h-5 text-[#C25E3E]" />}
+                {isSelected && <Check className="w-5 h-5 text-indigo-600" />}
               </button>
             );
           })}
         </div>
 
-        <div className="pt-3 border-t border-[#E8DFC8]">
+        <div className="pt-3 border-t border-slate-100">
           <button
             type="button"
             onClick={() => {
               onClose();
               onOpenNewMonthModal();
             }}
-            className="w-full py-3 bg-[#FDF2EC] hover:bg-[#F8EBE3] text-[#C25E3E] font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-[#F7D5C9] active:bg-[#F3E0D5] transition-colors cursor-pointer"
+            className="w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-sm rounded-xl flex items-center justify-center gap-2 active:bg-indigo-200 transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            নতুন মাস যোগ করুন (New Cycle)
+            Create New Month Cycle
           </button>
         </div>
       </div>

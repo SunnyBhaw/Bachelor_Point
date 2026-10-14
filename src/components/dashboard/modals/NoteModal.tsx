@@ -39,26 +39,26 @@ export default function NoteModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#FDFBF7] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E8DFC8] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#E8DFC8] mb-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[#F5E5DC] text-[#C25E3E] flex items-center justify-center font-bold">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-[#2C241E]">
-                {editingNoteId ? 'কন্টাক্ট / নোটিশ সম্পাদনা' : 'নতুন কন্টাক্ট / নোটিশ যোগ'}
+              <h3 className="text-base font-bold text-slate-900">
+                {editingNoteId ? 'Edit Contact / Note' : 'Add Contact / Note'}
               </h3>
-              <p className="text-xs text-[#8C7A6B]">
-                সকল রুমমেটের জন্য উন্মুক্ত • পিন প্রয়োজন নেই
+              <p className="text-xs text-slate-500">
+                Open to all roommates • No PIN required
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-lg text-[#8C7A6B] hover:text-[#2C241E] hover:bg-[#F3ECE1] flex items-center justify-center text-sm font-bold cursor-pointer"
+            className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center text-sm font-bold cursor-pointer"
           >
             ✕
           </button>
@@ -67,8 +67,8 @@ export default function NoteModal({
         {/* Quick Suggestions Chips */}
         {!editingNoteId && (
           <div className="mb-4">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A6B] mb-1.5">
-              প্রিসেট বাছাই করুন (Quick Presets)
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              Quick Presets
             </label>
             <div className="flex flex-wrap gap-1.5">
               {COMMON_NOTE_SUGGESTIONS.map((item) => (
@@ -81,7 +81,7 @@ export default function NoteModal({
                     if (!noteContact) setNoteContact(item.placeholderNumber);
                     if (!noteDetails) setNoteDetails(item.placeholderDetails);
                   }}
-                  className="text-xs px-2.5 py-1.5 rounded-xl border border-[#DDD3C2] bg-white hover:border-[#E8C2B3] hover:bg-[#FDF2EC]/40 text-[#2C241E] font-semibold transition-colors cursor-pointer touch-manipulation flex items-center gap-1.5"
+                  className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/40 active:bg-indigo-100 text-slate-700 font-semibold transition-colors cursor-pointer touch-manipulation flex items-center gap-1.5"
                 >
                   <span className="pointer-events-none">{item.icon}</span>
                   <span className="pointer-events-none">{item.title}</span>
@@ -93,59 +93,59 @@ export default function NoteModal({
 
         <form onSubmit={onSaveNote} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
-              শিরোনাম / কন্টাক্ট নাম <span className="text-[#B33A3A]">*</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Title / Contact Name <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="যেমন: বুয়ার নাম্বার, ওয়াইফাই হেল্পলাইন, গ্যাস সিলিন্ডার..."
+              placeholder="e.g. বুয়ার নাম্বার, WiFi Support, গ্যাস সিলিন্ডার..."
               value={noteTitle}
               onChange={(e) => setNoteTitle(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden bg-white text-[#2C241E]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
-              ফোন নাম্বার (ঐচ্ছিক)
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Phone Number (Optional)
             </label>
             <input
               type="tel"
-              placeholder="যেমন: 017xxxxxxxx বা 096xxxxxxx"
+              placeholder="e.g. 017xxxxxxxx or 096xxxxxxx"
               value={noteContact}
               onChange={(e) => setNoteContact(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden font-mono bg-white text-[#2C241E]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#8C7A6B] mb-1">
-              বিস্তারিত / নির্দেশনা / নোট (ঐচ্ছিক)
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Details / Instructions / Notes (Optional)
             </label>
             <textarea
               rows={3}
-              placeholder="যেমন: User ID: 10425, বুয়া সকাল ৭টায় আসে, শুক্রবার ছুটি..."
+              placeholder="e.g. User ID: 10425, বুয়া সকাল ৭টায় আসে, শুক্রবার বন্ধ..."
               value={noteDetails}
               onChange={(e) => setNoteDetails(e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-xl border border-[#DDD3C2] focus:border-[#C25E3E] outline-hidden bg-white text-[#2C241E]"
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:border-indigo-500 outline-hidden"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E8DFC8]">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-[#8C7A6B] hover:bg-[#F3ECE1] rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
             >
-              বাতিল
+              Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 text-xs font-bold bg-[#C25E3E] hover:bg-[#B05133] active:bg-[#9C452B] text-white rounded-xl transition-all shadow-2xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+              className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-md shadow-indigo-100 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
             >
-              {editingNoteId ? 'আপডেট করুন' : 'সেভ করুন'}
+              {editingNoteId ? 'Update Note' : 'Save Note'}
             </button>
           </div>
         </form>

@@ -68,11 +68,11 @@ export default function Header({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FDFBF7] border-b border-[#E8DFC8] shadow-xs">
+    <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
       <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-3">
-        {/* Brand Logo & Title with Warm Bengali Touch */}
+        {/* Brand Logo & Title */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-[#E0D5C1] shadow-2xs flex items-center justify-center bg-white shrink-0">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center bg-white shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -81,13 +81,9 @@ export default function Header({
             />
           </div>
           <div>
-            <h1 className="text-sm sm:text-xl font-extrabold tracking-tight text-[#2C241E] leading-tight flex items-baseline gap-1.5">
-              <span>Bachelor Point</span>
-              <span className="text-[11px] sm:text-xs font-semibold text-[#8C7A6B] hidden sm:inline">
-                • মেস হিসাব
-              </span>
+            <h1 className="text-sm sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+              Bachelor Point
             </h1>
-            <p className="text-[10px] text-[#8C7A6B] sm:hidden leading-none">মেস হিসাব</p>
           </div>
         </div>
 
@@ -98,26 +94,26 @@ export default function Header({
             <button
               type="button"
               onClick={() => setMonthDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#DDD3C2] hover:border-[#C25E3E] active:bg-[#FDFBF7] rounded-xl shadow-2xs transition-all text-left group cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 hover:border-indigo-300 active:bg-slate-50 rounded-xl shadow-2xs transition-all text-left group cursor-pointer"
             >
-              <div className="w-6 h-6 rounded-lg bg-[#F5E5DC] text-[#C25E3E] flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                 <Calendar className="w-3.5 h-3.5" />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-[#2C241E] group-hover:text-[#C25E3E] transition-colors">
+              <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                 {currentCycle.name}
               </span>
               <ChevronDown
-                className={`w-3.5 h-3.5 text-[#8C7A6B] transition-transform duration-200 shrink-0 ${
-                  monthDropdownOpen ? 'rotate-180 text-[#C25E3E]' : ''
+                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
+                  monthDropdownOpen ? 'rotate-180 text-indigo-600' : ''
                 }`}
               />
             </button>
 
             {/* Floating Menu Popover (Desktop) */}
             {monthDropdownOpen && (
-              <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-64 bg-[#FDFBF7] rounded-2xl shadow-xl border border-[#E8DFC8] py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#8C7A6B]">
-                  Billing Cycles • মাস নির্বাচন
+              <div className="absolute right-0 sm:right-auto sm:left-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Billing Cycles
                 </div>
 
                 <div className="max-h-56 overflow-y-auto px-1.5 space-y-1">
@@ -135,35 +131,35 @@ export default function Header({
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                           isSelected
-                            ? 'bg-[#F5E5DC] text-[#C25E3E] font-bold border border-[#E8C2B3]'
-                            : 'text-[#4A3E35] hover:bg-[#F3ECE1] active:bg-[#EBE2D4]'
+                            ? 'bg-indigo-50 text-indigo-700 font-bold'
+                            : 'text-slate-700 hover:bg-slate-50 active:bg-slate-100'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <div
                             className={`w-2 h-2 rounded-full ${
-                              isSelected ? 'bg-[#C25E3E]' : 'bg-[#DDD3C2]'
+                              isSelected ? 'bg-indigo-600' : 'bg-slate-300'
                             }`}
                           />
                           <span>{c.name}</span>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-[#C25E3E] shrink-0" />}
+                        {isSelected && <Check className="w-4 h-4 text-indigo-600 shrink-0" />}
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="border-t border-[#E8DFC8] mt-2 pt-2 px-2">
+                <div className="border-t border-slate-100 mt-2 pt-2 px-2">
                   <button
                     type="button"
                     onClick={() => {
                       setMonthDropdownOpen(false);
                       onOpenNewMonthModal();
                     }}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold text-[#C25E3E] bg-[#FDF2EC] hover:bg-[#F8EBE3] border border-[#F7D5C9] active:bg-[#F3E0D5] transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 transition-colors cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    নতুন মাস যোগ করুন
+                    Create New Month
                   </button>
                 </div>
               </div>
@@ -174,24 +170,24 @@ export default function Header({
           <button
             type="button"
             onClick={onOpenMobileCycleModal}
-            className="sm:hidden flex items-center gap-1 px-2 py-1.5 bg-[#F3ECE1] active:bg-[#EAE1D3] border border-[#DDD3C2] rounded-xl text-xs font-bold text-[#2C241E] shrink-0 cursor-pointer"
+            className="sm:hidden flex items-center gap-1 px-2 py-1.5 bg-slate-100 active:bg-slate-200 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 shrink-0 cursor-pointer"
             title="Select Month"
           >
-            <Calendar className="w-3.5 h-3.5 text-[#C25E3E] shrink-0" />
+            <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
             <span className="truncate max-w-[85px]">{currentCycle.name.split(' ')[0]}</span>
-            <ChevronDown className="w-3 h-3 text-[#8C7A6B] shrink-0" />
+            <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
           </button>
 
           {/* Admin Status Indicator & Lock / Unlock Toggle */}
           {isAdmin ? (
-            <div className="flex items-center gap-1 bg-[#E2EBDD] border border-[#CFDEC8] pl-2 pr-1 py-1 rounded-xl text-[#2D5A27] text-xs font-bold shadow-2xs shrink-0">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#2D5A27] shrink-0" />
+            <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 pl-2 pr-1 py-1 rounded-xl text-emerald-800 text-xs font-bold shadow-2xs shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span className="hidden sm:inline">Admin</span>
               <button
                 type="button"
                 onClick={onOpenChangePinModal}
                 title="Change Admin PIN"
-                className="p-1 text-[#2D5A27] hover:text-[#C25E3E] hover:bg-[#CFDEC8] rounded-md transition-colors cursor-pointer touch-manipulation"
+                className="p-1 text-emerald-700 hover:text-indigo-600 hover:bg-emerald-100 rounded-md transition-colors cursor-pointer touch-manipulation"
               >
                 <KeyRound className="w-3 h-3 pointer-events-none" />
               </button>
@@ -199,7 +195,7 @@ export default function Header({
                 type="button"
                 onClick={onLock}
                 title="Lock Admin Mode"
-                className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] bg-white border border-[#CFDEC8] hover:border-[#B33A3A] text-[#2D5A27] hover:text-[#B33A3A] rounded-lg transition-colors font-bold cursor-pointer touch-manipulation"
+                className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] bg-white border border-emerald-300 hover:border-rose-300 text-emerald-700 hover:text-rose-600 rounded-lg transition-colors font-bold cursor-pointer touch-manipulation"
               >
                 Lock
               </button>
@@ -208,9 +204,9 @@ export default function Header({
             <button
               type="button"
               onClick={onOpenPinModal}
-              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#F3ECE1] hover:bg-[#EAE1D3] active:bg-[#DFD5C4] text-[#4A3E35] rounded-xl text-xs font-bold transition-all border border-[#DDD3C2] shrink-0 cursor-pointer touch-manipulation"
+              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 shrink-0 cursor-pointer touch-manipulation"
             >
-              <Lock className="w-3 h-3 text-[#8C7A6B] shrink-0 pointer-events-none" />
+              <Lock className="w-3 h-3 text-slate-500 shrink-0 pointer-events-none" />
               <span className="pointer-events-none hidden sm:inline">Admin Unlock</span>
               <span className="pointer-events-none sm:hidden">Unlock</span>
             </button>
@@ -221,7 +217,7 @@ export default function Header({
             type="button"
             onClick={onOpenMobileDrawer}
             aria-label="Open mobile navigation menu"
-            className="sm:hidden p-1.5 text-[#4A3E35] hover:text-[#2C241E] active:bg-[#F3ECE1] rounded-xl border border-[#DDD3C2] bg-white shadow-2xs shrink-0 cursor-pointer touch-manipulation"
+            className="sm:hidden p-1.5 text-slate-700 hover:text-slate-900 active:bg-slate-100 rounded-xl border border-slate-200 bg-white shadow-2xs shrink-0 cursor-pointer touch-manipulation"
           >
             <Menu className="w-4 h-4 pointer-events-none" />
           </button>
@@ -229,22 +225,22 @@ export default function Header({
       </div>
 
       {/* Mobile Top Sticky Segmented Tab Switcher (< sm) */}
-      <div className="flex sm:hidden items-center justify-between border-t border-[#E8DFC8] bg-[#FDFBF7]/95 backdrop-blur-md px-2 py-1.5 gap-1.5 select-none sticky top-[51px] z-20 shadow-xs">
+      <div className="flex sm:hidden items-center justify-between border-t border-slate-200 bg-white/95 backdrop-blur-md px-2 py-1.5 gap-1.5 select-none sticky top-[51px] z-20 shadow-xs">
         <button
           type="button"
           onClick={() => onTabChange('dues')}
           className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
             activeTab === 'dues'
-              ? 'bg-[#C25E3E] text-white shadow-xs'
-              : 'bg-[#F3ECE1] text-[#4A3E35] hover:bg-[#EAE1D3] active:bg-[#DFD5C4]'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
           }`}
         >
           <CreditCard className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
-          <span className="pointer-events-none">ভাড়া ও বিল</span>
+          <span className="pointer-events-none">Dues</span>
           {totalDuesPending > 0 && (
             <span
               className={`w-1.5 h-1.5 rounded-full shrink-0 pointer-events-none ${
-                activeTab === 'dues' ? 'bg-[#FDF0D5]' : 'bg-[#B33A3A]'
+                activeTab === 'dues' ? 'bg-amber-300' : 'bg-rose-500'
               }`}
             />
           )}
@@ -255,12 +251,12 @@ export default function Header({
           onClick={() => onTabChange('utilities')}
           className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
             activeTab === 'utilities'
-              ? 'bg-[#C25E3E] text-white shadow-xs'
-              : 'bg-[#F3ECE1] text-[#4A3E35] hover:bg-[#EAE1D3] active:bg-[#DFD5C4]'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
           }`}
         >
           <Receipt className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
-          <span className="pointer-events-none">মেস খরচ</span>
+          <span className="pointer-events-none">Bills</span>
         </button>
 
         <button
@@ -268,12 +264,12 @@ export default function Header({
           onClick={() => onTabChange('members')}
           className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
             activeTab === 'members'
-              ? 'bg-[#C25E3E] text-white shadow-xs'
-              : 'bg-[#F3ECE1] text-[#4A3E35] hover:bg-[#EAE1D3] active:bg-[#DFD5C4]'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
           }`}
         >
           <Users className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
-          <span className="pointer-events-none">সদস্য</span>
+          <span className="pointer-events-none">Members</span>
         </button>
 
         <button
@@ -281,16 +277,16 @@ export default function Header({
           onClick={() => onTabChange('notes')}
           className={`flex-1 min-h-[42px] py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer touch-manipulation ${
             activeTab === 'notes'
-              ? 'bg-[#C25E3E] text-white shadow-xs'
-              : 'bg-[#F3ECE1] text-[#4A3E35] hover:bg-[#EAE1D3] active:bg-[#DFD5C4]'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300'
           }`}
         >
           <BookOpen className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
-          <span className="pointer-events-none">নোটিশ</span>
+          <span className="pointer-events-none">Notes</span>
           {importantNotesCount > 0 && (
             <span
               className={`px-1 py-0.2 rounded-full text-[9px] font-extrabold shrink-0 pointer-events-none ${
-                activeTab === 'notes' ? 'bg-[#9C452B] text-white' : 'bg-[#2D5A27] text-white'
+                activeTab === 'notes' ? 'bg-indigo-900 text-white' : 'bg-emerald-500 text-white'
               }`}
             >
               {importantNotesCount}
@@ -300,21 +296,21 @@ export default function Header({
       </div>
 
       {/* Navigation Tabs (Desktop & Tablet) */}
-      <div className="hidden sm:flex max-w-5xl mx-auto px-4 sm:px-6 border-t border-[#E8DFC8] overflow-x-auto">
+      <div className="hidden sm:flex max-w-5xl mx-auto px-4 sm:px-6 border-t border-slate-100 overflow-x-auto">
         <button
           type="button"
           onClick={() => onTabChange('dues')}
           className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
             activeTab === 'dues'
-              ? 'border-[#C25E3E] text-[#C25E3E] bg-[#FDF2EC]/70 font-bold'
-              : 'border-transparent text-[#7A6A5C] hover:text-[#2C241E]'
+              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
           <CreditCard className="w-4 h-4 pointer-events-none" />
-          <span className="pointer-events-none">Member Dues & Payments (ভাড়া ও বিল)</span>
+          <span className="pointer-events-none">Member Dues & Payments</span>
           {totalDuesPending > 0 && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#FDF2EC] text-[#B33A3A] border border-[#F7D5C9] font-bold pointer-events-none">
-              ৳{Math.round(totalDuesPending)} বাকি
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold pointer-events-none">
+              ৳{Math.round(totalDuesPending)} Due
             </span>
           )}
         </button>
@@ -324,26 +320,26 @@ export default function Header({
           onClick={() => onTabChange('utilities')}
           className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
             activeTab === 'utilities'
-              ? 'border-[#C25E3E] text-[#C25E3E] bg-[#FDF2EC]/70 font-bold'
-              : 'border-transparent text-[#7A6A5C] hover:text-[#2C241E]'
+              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
           <Receipt className="w-4 h-4 pointer-events-none" />
-          <span className="pointer-events-none">Utility Bills & Payouts (মেস খরচ)</span>
+          <span className="pointer-events-none">Utility Bills & Split</span>
           <span
             className={`text-[11px] px-2 py-0.5 rounded-full font-bold pointer-events-none ${
               netUtilityAdjustment === 0
-                ? 'bg-[#E2EBDD] text-[#2D5A27]'
+                ? 'bg-emerald-100 text-emerald-800'
                 : netUtilityAdjustment > 0
-                ? 'bg-[#E2EBDD] text-[#2D5A27]'
-                : 'bg-[#FDF0D5] text-[#9C6500]'
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-amber-100 text-amber-800'
             }`}
           >
             {netUtilityAdjustment === 0
               ? 'Balanced'
               : netUtilityAdjustment > 0
               ? `+৳${netUtilityAdjustment.toFixed(0)} Surplus`
-              : `-৳${Math.abs(netUtilityAdjustment).toFixed(0)} Deficit`}
+              : `-৳${Math.abs(netUtilityAdjustment).toFixed(0)} Loss`}
           </span>
         </button>
 
@@ -352,12 +348,12 @@ export default function Header({
           onClick={() => onTabChange('members')}
           className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
             activeTab === 'members'
-              ? 'border-[#C25E3E] text-[#C25E3E] bg-[#FDF2EC]/70 font-bold'
-              : 'border-transparent text-[#7A6A5C] hover:text-[#2C241E]'
+              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
           <Users className="w-4 h-4 pointer-events-none" />
-          <span className="pointer-events-none">Roommates ({memberCount})</span>
+          <span className="pointer-events-none">Members ({memberCount})</span>
         </button>
 
         <button
@@ -365,13 +361,13 @@ export default function Header({
           onClick={() => onTabChange('notes')}
           className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer touch-manipulation ${
             activeTab === 'notes'
-              ? 'border-[#C25E3E] text-[#C25E3E] bg-[#FDF2EC]/70 font-bold'
-              : 'border-transparent text-[#7A6A5C] hover:text-[#2C241E]'
+              ? 'border-indigo-600 text-indigo-600 bg-indigo-50/40'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
           <BookOpen className="w-4 h-4 pointer-events-none" />
           <span className="pointer-events-none">Important Notes ({importantNotesCount})</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#E2EBDD] text-[#2D5A27] font-bold uppercase tracking-wider pointer-events-none">
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase tracking-wider pointer-events-none">
             Open
           </span>
         </button>
