@@ -15,6 +15,7 @@ import {
   Users,
   BookOpen,
   ShoppingBag,
+  ListTodo,
 } from 'lucide-react';
 import { BillingCycle, BillingCycleSummary, TabType } from './types';
 
@@ -268,8 +269,8 @@ export default function Header({
                 : 'text-slate-600 hover:text-slate-900 active:bg-slate-200/50'
             }`}
           >
-            <ShoppingBag className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
-            <span className="pointer-events-none truncate">Pantry</span>
+            <ListTodo className="w-3.5 h-3.5 shrink-0 pointer-events-none" />
+            <span className="pointer-events-none truncate">To-Do</span>
             {pantryPendingCount > 0 && (
               <span className="absolute top-1 right-1.5 px-1 py-0.2 rounded-full bg-amber-500 text-white text-[9px] font-extrabold leading-none">
                 {pantryPendingCount}
@@ -355,8 +356,8 @@ export default function Header({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
             }`}
           >
-            <ShoppingBag className="w-4 h-4 shrink-0 pointer-events-none" />
-            <span className="pointer-events-none">Pantry</span>
+            <ListTodo className="w-4 h-4 shrink-0 pointer-events-none" />
+            <span className="pointer-events-none">To-Do List</span>
             {pantryPendingCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold leading-none pointer-events-none">
                 {pantryPendingCount}

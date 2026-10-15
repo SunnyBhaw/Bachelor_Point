@@ -8,6 +8,7 @@ import {
   Users,
   BookOpen,
   ShoppingBag,
+  ListTodo,
   ShieldCheck,
   Lock,
 } from 'lucide-react';
@@ -169,8 +170,8 @@ export default function MobileDrawer({
             }`}
           >
             <div className="flex items-center gap-3">
-              <ShoppingBag className={`w-4 h-4 ${activeTab === 'pantry' ? 'text-white' : 'text-slate-500'}`} />
-              <span>Pantry & Grocery List</span>
+              <ListTodo className={`w-4 h-4 ${activeTab === 'pantry' ? 'text-white' : 'text-slate-500'}`} />
+              <span>To-Do & Grocery List</span>
             </div>
             {pantryPendingCount > 0 ? (
               <span
@@ -178,7 +179,7 @@ export default function MobileDrawer({
                   activeTab === 'pantry' ? 'bg-indigo-800 text-white' : 'bg-amber-100 text-amber-700'
                 }`}
               >
-                {pantryPendingCount} to buy
+                {pantryPendingCount} to do
               </span>
             ) : (
               <span

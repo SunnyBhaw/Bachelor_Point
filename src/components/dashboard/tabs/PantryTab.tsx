@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useTransition, useCallback } from 'react';
 import {
   ShoppingBag,
+  ListTodo,
   Plus,
   Check,
   Trash2,
@@ -365,8 +366,8 @@ export default function PantryTab({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-indigo-600" />
-              Shared Mess Pantry & Grocery Checklist
+              <ListTodo className="w-5 h-5 text-indigo-600" />
+              Shared Mess To-Do & Grocery Checklist
             </h3>
             <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
               Open to All Roommates
@@ -390,7 +391,7 @@ export default function PantryTab({
             )}
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            বাজারের ফর্দ ও মেস স্টক তালিকা। বাজারে ইন্টারনেট না থাকলেও সহজে টিক দিন বা যোগ করুন—স্বয়ংক্রিয়ভাবে সিঙ্ক হবে।
+            মেসের কাজ ও বাজারের ফর্দ। বাজারে বা বাইরে নেটওয়ার্ক না থাকলেও সহজে টিক দিন বা নতুন কাজ যোগ করুন—স্বয়ংক্রিয়ভাবে সিঙ্ক হবে।
           </p>
         </div>
 
@@ -402,7 +403,7 @@ export default function PantryTab({
               onClick={handleClearCompleted}
               className="px-3 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
-              Clear Bought ({completedItems.length})
+              Clear Completed ({completedItems.length})
             </button>
           )}
 
@@ -412,7 +413,7 @@ export default function PantryTab({
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4 pointer-events-none" />
-            <span>Add Custom Item</span>
+            <span>Add Task / Item</span>
           </button>
         </div>
       </div>
@@ -428,7 +429,7 @@ export default function PantryTab({
           }`}
         >
           <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Total Items (মোট)
+            Total Tasks / Items (মোট)
           </div>
           <div className="text-2xl font-black text-slate-900 mt-1">{totalCount}</div>
         </div>
@@ -442,7 +443,7 @@ export default function PantryTab({
           }`}
         >
           <div className="text-[11px] font-bold text-amber-600 uppercase tracking-wider">
-            To Buy (দরকার)
+            To Do / To Buy (বাকি কাজ)
           </div>
           <div className="text-2xl font-black text-amber-600 mt-1">
             {pendingItems.length}
@@ -476,7 +477,7 @@ export default function PantryTab({
         >
           <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
             <Check className="w-3 h-3 text-emerald-500" />
-            Bought (কেনা শেষ)
+            Completed (সম্পন্ন)
           </div>
           <div className="text-2xl font-black text-emerald-600 mt-1">
             {completedItems.length}
@@ -524,7 +525,7 @@ export default function PantryTab({
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <Plus className="w-4 h-4 text-indigo-600" />
-              Add Item to Checklist (ফর্দে নতুন পণ্য যোগ করুন)
+              Add Task or Item to List (তালিকায় নতুন কাজ বা পণ্য যোগ করুন)
             </h4>
             <button
               type="button"
@@ -539,13 +540,13 @@ export default function PantryTab({
             {/* Item Name */}
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Item Name (পণ্যের নাম) <span className="text-rose-500">*</span>
+                Task / Item Name (কাজের নাম বা পণ্য) <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
-                placeholder="e.g. মিনিকেট চাল, ডিম, গরুর মাংস, ডিশ ওয়াশ"
+                placeholder="e.g. মিনিকেট চাল ২৫ কেজি, ডিম, বুয়াকে জানানো, গ্যাস চেক করা"
                 className="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 required
                 autoFocus
