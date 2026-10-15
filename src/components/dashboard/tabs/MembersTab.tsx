@@ -10,6 +10,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { Member } from '../types';
+import { WhatsAppIcon, formatWhatsAppNumber } from '@/lib/whatsapp';
 
 interface MembersTabProps {
   members: Member[];
@@ -146,13 +147,24 @@ export default function MembersTab({
                     </div>
                     <div>
                       <h4 className="font-bold text-slate-900 text-sm">{member.name}</h4>
-                      <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                        <Phone className="w-3 h-3 text-slate-400" />
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3 h-3 text-slate-400" />
+                          <a
+                            href={`tel:${member.phone}`}
+                            className="hover:text-indigo-600 hover:underline"
+                          >
+                            {member.phone}
+                          </a>
+                        </div>
                         <a
-                          href={`tel:${member.phone}`}
-                          className="hover:text-indigo-600 hover:underline"
+                          href={`https://wa.me/${formatWhatsAppNumber(member.phone)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`Chat with ${member.name} on WhatsApp`}
+                          className="p-1 text-[#25D366] hover:bg-emerald-50 rounded-md transition-colors"
                         >
-                          {member.phone}
+                          <WhatsAppIcon className="w-3.5 h-3.5 fill-current" />
                         </a>
                       </div>
                     </div>

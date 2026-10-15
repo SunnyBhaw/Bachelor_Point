@@ -10,6 +10,12 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { BillingCycle, MemberBilling } from '../types';
+import {
+  WhatsAppIcon,
+  formatWhatsAppNumber,
+  buildWhatsAppReminderMessage,
+  buildWhatsAppReceiptMessage,
+} from '@/lib/whatsapp';
 
 interface DuesTabProps {
   currentCycle: BillingCycle;
@@ -33,6 +39,47 @@ export default function DuesTab({
   onShowToast,
 }: DuesTabProps) {
   const memberBillings = currentCycle.memberBillings || [];
+
+  const handleSendWhatsAppReminder = (mb: MemberBilling, totalDue: number, balance: number) => {
+    const phone = formatWhatsAppNumber(mb.member.phone);
+    const msg = buildWhatsAppReminderMessage({
+      memberName: mb.member.name,
+      cycleName: currentCycle.name,
+      roomRent: mb.roomRent,
+      utilityShare: totalUtilitySharePerMember,
+      totalDue,
+      paidAmount: mb.paidAmount,
+      balance,
+    });
+
+    if (typeof window !== 'undefined' && navigator?.clipboard) {
+      navigator.clipboard.writeText(msg).catch(() => {});
+    }
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    onShowToast(`Opening WhatsApp reminder for ${mb.member.name}! 💬 (Text copied to clipboard)`, 'success');
+  };
+
+  const handleSendWhatsAppReceipt = (mb: MemberBilling, totalDue: number) => {
+    const phone = formatWhatsAppNumber(mb.member.phone);
+    const msg = buildWhatsAppReceiptMessage({
+      memberName: mb.member.name,
+      cycleName: currentCycle.name,
+      roomRent: mb.roomRent,
+      utilityShare: totalUtilitySharePerMember,
+      totalDue,
+      paidAmount: mb.paidAmount,
+    });
+
+    if (typeof window !== 'undefined' && navigator?.clipboard) {
+      navigator.clipboard.writeText(msg).catch(() => {});
+    }
+
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    onShowToast(`Opening WhatsApp receipt for ${mb.member.name}! 🧾 (Text copied to clipboard)`, 'success');
+  };
 
   const handleCopyWhatsAppSummary = () => {
     if (memberBillings.length === 0) return;
@@ -129,13 +176,24 @@ export default function DuesTab({
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                      <div className="flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5 text-slate-400" />
+                        <a
+                          href={`tel:${mb.member.phone}`}
+                          className="hover:text-indigo-600 hover:underline"
+                        >
+                          {mb.member.phone}
+                        </a>
+                      </div>
                       <a
-                        href={`tel:${mb.member.phone}`}
-                        className="hover:text-indigo-600 hover:underline"
+                        href={`https://wa.me/${formatWhatsAppNumber(mb.member.phone)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Chat with ${mb.member.name} on WhatsApp`}
+                        className="p-1 text-[#25D366] hover:bg-emerald-50 rounded-md transition-colors"
                       >
-                        {mb.member.phone}
+                        <WhatsAppIcon className="w-3.5 h-3.5 fill-current" />
                       </a>
                     </div>
                   </div>
@@ -234,32 +292,59 @@ export default function DuesTab({
                       </span>
                     </div>
 
-                    {/* Quick 1-Tap Action Buttons for Admin */}
-                    {isAdmin && (
-                      <div className="flex items-center gap-1.5">
-                        {balance > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => onQuickFullPay(mb, totalDue)}
-                            title="Mark as 100% Fully Paid"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer touch-manipulation whitespace-nowrap active:scale-95"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Mark Full</span>
-                          </button>
-                        )}
-                        {mb.paidAmount > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => onQuickResetPay(mb)}
-                            title="Reset payment to 0"
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    {/* Action Buttons: 1-Tap WhatsApp Reminder & Admin Controls */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {balance > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleSendWhatsAppReminder(mb, totalDue, balance)}
+                          title={`Send 1-Tap WhatsApp Dues Reminder to ${mb.member.name}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#25D366] hover:bg-[#1EBE5D] active:scale-95 text-white rounded-xl shadow-xs transition-all cursor-pointer touch-manipulation whitespace-nowrap"
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5 fill-current" />
+                          <span>Remind</span>
+                        </button>
+                      )}
+
+                      {isPaid && (
+                        <button
+                          type="button"
+                          onClick={() => handleSendWhatsAppReceipt(mb, totalDue)}
+                          title={`Send WhatsApp Payment Receipt to ${mb.member.name}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-xl transition-all active:scale-95 cursor-pointer touch-manipulation whitespace-nowrap"
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5 fill-emerald-600" />
+                          <span>Receipt</span>
+                        </button>
+                      )}
+
+                      {/* Admin Specific Actions */}
+                      {isAdmin && (
+                        <>
+                          {balance > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => onQuickFullPay(mb, totalDue)}
+                              title="Mark as 100% Fully Paid"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition-colors cursor-pointer touch-manipulation whitespace-nowrap active:scale-95"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Mark Full</span>
+                            </button>
+                          )}
+                          {mb.paidAmount > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => onQuickResetPay(mb)}
+                              title="Reset payment to 0"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
